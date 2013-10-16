@@ -2,7 +2,7 @@
 
 #pylint: disable=E1101, E1103
 
-from tempest_report import utils
+from tempest_report import utils, settings
 
 import unittest
 import tempfile
@@ -11,9 +11,12 @@ import mock
 import subprocess
 import ConfigParser
 
-from tempest_report.utils import customized_tempest_conf, get_smallest_flavor, get_smallest_image, get_services, get_tenants, ServiceSummary
+from tempest_report.utils import customized_tempest_conf, get_smallest_flavor, get_smallest_image, get_services, get_tenants, ServiceSummary, service_summary, executer, get_images, get_flavors
+
 
 from keystoneclient.v2_0 import client 
+import glanceclient
+import novaclient
 import requests
 
 
@@ -61,8 +64,9 @@ class UtilTest(unittest.TestCase):
         utils.get_smallest_image = mock.Mock(return_value=img_obj)
         fileobj = DummyFileObject()
         retval = customized_tempest_conf('user', 'password', 'url', fileobj)
+        
+        # TODO: check if config is valid
 
-        self.assertTrue(retval)
     
     def test_get_smallest_flavor(self):
         class DummyFlavor(object):
@@ -127,9 +131,43 @@ class UtilTest(unittest.TestCase):
         client.Client.assert_called_with(username="user",
             password="password", auth_url="keystone_url")
 
+    def test_executer(self):
+        subprocess.check_output=mock.Mock(return_value="output") 
+        success, output = executer("testname", "/dir/filename")
+        
+        self.assertTrue(success)
+        self.assertEqual(output, "output")
+        subprocess.check_output.assert_called_with(
+            ["nosetests", "-v", "testname"], stderr=subprocess.STDOUT)
 
-class ServiceSummaryTest(unittest.TestCase):
-    def test_core(self):
+        subprocess.check_output=mock.Mock(return_value="output")
+        subprocess.check_output.side_effect = \
+            subprocess.CalledProcessError(1, "command", "error")
+        success, output = executer("testname", "filename")
+        
+        self.assertFalse(success)
+        self.assertEqual(output, "error")
+
+    def test_summary(self):
+        successful_tests = ['test.a', 'test.b']
+        with mock.patch.dict(settings.description_list, {
+            'test.a' : {'service': 'A',
+                        'feature': '1',
+                        'release': 0},
+            'test.b' : {'service': 'B',
+                        'feature': '2',
+                        'release': 5},
+            }):
+            
+            summary = service_summary(successful_tests)
+            
+            assert 'A' in summary
+            assert '1' in summary.get('A').features
+            assert 'B' in summary
+            assert '2' in summary.get('B').features
+            self.assertEqual(summary.get('B').release_name, 'Essex')
+
+    def test_summary_class(self):
         summary = ServiceSummary('servicename')
         self.assertEqual(summary.release_name, '')
         
@@ -144,3 +182,44 @@ class ServiceSummaryTest(unittest.TestCase):
 
         self.assertEqual(str(summary), 'servicename')
         self.assertEqual(summary.features, ['feature', ])
+
+    def test_get_images(self):
+        class DummyImages(object):
+            def list(self):
+                return ['first image']
+
+        with mock.patch('glanceclient.Client') as glance:
+            images = DummyImages()
+            glance.return_value.images = images
+            retval = get_images("token_id", "http://url:5000/v2")
+            self.assertEqual(retval, ['first image'])
+
+        glance.assert_called_with(2, "http://url:5000", 
+            token="token_id")
+        
+        with mock.patch('glanceclient.Client') as glance:
+            get_images("token_id", "http://url:35357/v1")
+
+        glance.assert_called_with(1, "http://url:35357",
+            token="token_id")
+
+        with mock.patch('glanceclient.Client') as glance:
+            get_images("token_id", "http://url/wrong")
+
+        glance.assert_called_with(1, "http://url",
+            token="token_id")
+
+    def test_get_flavors(self):
+        class DummyFlavors(object):
+            def list(self):
+                return ['flavor']
+
+        with mock.patch('novaclient.v1_1.client.Client') as nova:
+            flavors = DummyFlavors()
+            nova.return_value.flavors = flavors
+            retval = get_flavors("user", "password",
+                "tenant_name", "url")
+            self.assertEqual(retval, ['flavor'])
+
+        nova.assert_called_with("user", "password",
+            "tenant_name", "url")

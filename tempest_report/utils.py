@@ -3,6 +3,7 @@
 import os
 import pkgutil
 import subprocess
+from urlparse import urlparse
 
 import requests
 
@@ -12,7 +13,7 @@ from tempest_report.settings import name_mapping
 
 from keystoneclient.v2_0 import client
 import glanceclient
-from novaclient.client import get_client_class
+import novaclient
 
 from tempest import config
 import tempfile
@@ -92,9 +93,9 @@ def executer(testname, configfile):
 
 
 def get_flavors(user, password, tenant_name, url, token=None):
-    Client = get_client_class(2)
-    client = Client(user, password, tenant_name, url)
-    return client.flavors.list()
+    client_class = novaclient.client.get_client_class(2)
+    nova_client = client_class(user, password, tenant_name, url)
+    return nova_client.flavors.list()
 
 
 def get_smallest_flavor(user, password, tenant_name, keystone_url):
@@ -149,8 +150,8 @@ def get_images(token_id, url):
     except ValueError:
         version = 1
 
-    url = url.replace('/v1', '')
-    url = url.replace('/v2', '')
+    parsed = urlparse(url)
+    url = "%s://%s" % (parsed.scheme, parsed.netloc)
     glance = glanceclient.Client(version, url, token=token_id)
     return [img for img in glance.images.list()]
 
@@ -199,12 +200,8 @@ def customized_tempest_conf(user, password, keystone_url, fileobj):
         for name, value in settings.items():
             if not tempest_config.has_section(section):
                 tempest_config.add_section(section)
-            try:
                 value = str(value)
                 tempest_config.set(section, name, value)
-            except:
-                pass
-    
     
     tempest_config.set('identity', 'uri', services.get('identity') + '/')
     tempest_config.set('identity', 'uri_v3', "")
@@ -232,6 +229,3 @@ def customized_tempest_conf(user, password, keystone_url, fileobj):
     
     with fileobj:
         tempest_config.write(fileobj)
-        return True
-    return False
-
