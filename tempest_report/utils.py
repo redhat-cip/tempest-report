@@ -13,7 +13,7 @@ from tempest_report.settings import name_mapping
 
 from keystoneclient.v2_0 import client
 import glanceclient
-import novaclient
+import novaclient.client
 
 from tempest import config
 import tempfile
