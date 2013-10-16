@@ -185,7 +185,6 @@ def customized_tempest_conf(user, password, keystone_url, fileobj):
     tenant_id = tenants[0]['id'] 
     tenant_name = tenants[0]['name'] 
     
-    url = keystone_url
     services, scoped_token = get_services(tenant_name, token, keystone_url)
     smallest_flavor = get_smallest_flavor(user, password, tenant_name, keystone_url)
     
