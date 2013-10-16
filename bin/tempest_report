@@ -1,0 +1,39 @@
+# Copyright (C) 2013 eNovance SAS <licensing@enovance.com>
+
+import os
+import tempfile
+import ConfigParser
+
+from tempest_report.utils import service_summary, executer, customized_tempest_conf
+from tempest_report import settings
+
+def main():
+    user = os.environ.get('OS_USERNAME', None)
+    password = os.environ.get('OS_PASSWORD', None)
+    keystone_url = os.environ.get('OS_AUTH_URL', None)
+
+    if not (user and password and keystone_url):
+        print "Please set OS_USERNAME, OS_PASSWORD and OS_AUTH_URL. Using local devstack defaults."
+        user = "demo"
+        password = "devstack"
+        keystone_url = "http://127.0.0.1:5000/v2.0/"
+
+    configfile = tempfile.NamedTemporaryFile(delete=False)
+    customized_tempest_conf(user, password, keystone_url, configfile)
+
+    successful_tests = [] 
+    for test in settings.description_list:
+        success, output = executer(test, configfile.name)
+        if success:
+            successful_tests.append(test)
+            print "OK: %s" % test
+    
+    for _, service in service_summary(successful_tests).items():
+        print "\n%s: %s" % (service.name, service.release_name)
+        for feature in service.features:
+            print "\t\t\t\t%s" % (feature,)
+    
+    os.remove(configfile.name)
+
+if __name__ == "__main__":
+    main()    
