@@ -17,7 +17,7 @@ def main():
         print "Please set OS_USERNAME, OS_PASSWORD and OS_AUTH_URL. Using local devstack defaults."
         user = "demo"
         password = "devstack"
-        keystone_url = "http://127.0.0.1:5000/v2.0/"
+        keystone_url = "http://127.0.0.1:5000"
 
     configfile = tempfile.NamedTemporaryFile(delete=False)
     customized_tempest_conf(user, password, keystone_url, configfile)

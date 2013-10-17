@@ -11,10 +11,10 @@ import mock
 import subprocess
 import ConfigParser
 
-from tempest_report.utils import customized_tempest_conf, get_smallest_flavor, get_smallest_image, get_services, get_tenants, ServiceSummary, service_summary, executer, get_images, get_flavors
+from tempest_report.utils import customized_tempest_conf, get_smallest_flavor, get_smallest_image, get_services, get_tenants, ServiceSummary, service_summary, executer, get_images, get_flavors, get_keystone_client
 
-
-from keystoneclient.v2_0 import client 
+import keystoneclient
+from keystoneclient.generic import client
 import glanceclient
 import novaclient
 import requests
@@ -44,7 +44,9 @@ class KeystoneDummy(object):
                                  'publicURL': 'url'
                             }],
                         }]}
-
+    def discover(self, _url):
+        return {'v3.0': {'url': 'http://127.0.0.1:5000/v3'},
+                'v2.0': {'url': 'http://127.0.0.1:5000/v2'}}
 
 class UtilTest(unittest.TestCase):
     def test_customized_tempest_conf(self):
@@ -107,29 +109,39 @@ class UtilTest(unittest.TestCase):
         self.assertEqual(smallest_image.size, 2)
 
     def test_get_services(self):
-        client.Client = mock.Mock(return_value=KeystoneDummy())
+
+        ks = KeystoneDummy()
+        client.Client = mock.Mock(return_value=ks)
+        requests.get = mock.Mock(return_value=KeystoneDummy())
+        keystoneclient.v2_0.client.Client = mock.Mock(return_value=KeystoneDummy())
+        keystoneclient.v3.client.Client = mock.Mock(return_value=KeystoneDummy())
+
         services, scoped_token = get_services("tenant_name",
             "token_id", "keystone_url")
         self.assertEqual(services, {'servicetype': 'url'})
         self.assertEqual(scoped_token, {'id': 'token'})
-        client.Client.assert_called_with(auth_url="keystone_url",
-            token="token_id", tenant_name="tenant_name")
+        client.Client.assert_called_with()
 
     def test_get_tenants(self):
         class DummyResponse(object):
+            def __init__(self, *args, **kwargs):
+                self.auth_ref = {'token': {'id': 'token'}}
+
             def json(self, *_args, **_kwargs):
                 return {'tenants': 'tenants'}
 
-        client.Client = mock.Mock(return_value=KeystoneDummy())
+        ks = KeystoneDummy()
+        client.Client = mock.Mock(return_value=ks)
         requests.get = mock.Mock(return_value=DummyResponse())
-        
+        keystoneclient.v2_0.client.Client = mock.Mock(return_value=DummyResponse())
+
+
         tenants, token = get_tenants("user",
-            "password", "keystone_url")
+            "password", "http://127.0.0.1")
         
         self.assertEqual(tenants, 'tenants')
         self.assertEqual(token, 'token')
-        client.Client.assert_called_with(username="user",
-            password="password", auth_url="keystone_url")
+        client.Client.assert_called_with()
 
     def test_executer(self):
         subprocess.check_output=mock.Mock(return_value="output") 
@@ -223,3 +235,23 @@ class UtilTest(unittest.TestCase):
 
         nova.assert_called_with("user", "password",
             "tenant_name", "url")
+
+    def test_get_keystone_client_v3(self):
+        class KeystoneDummy(object):
+            def discover(self, _url):
+                return {'v3.0': {'url': 'http://127.0.0.1:5000/v3'}}
+        keystoneclient.generic.client.Client = mock.Mock(
+            return_value=KeystoneDummy())
+
+        client = get_keystone_client('http://127.0.0.1:5000')
+        self.assertEqual(client, keystoneclient.v3.client)
+
+    def test_get_keystone_client_v2(self):
+        class KeystoneDummy(object):
+            def discover(self, _url):
+                return {'v2.0': {'url': 'http://127.0.0.1:5000/v2'}}
+        keystoneclient.generic.client.Client = mock.Mock(
+            return_value=KeystoneDummy())
+
+        client = get_keystone_client('http://127.0.0.1:5000')
+        self.assertEqual(client, keystoneclient.v2_0.client)
