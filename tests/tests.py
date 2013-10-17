@@ -2,15 +2,11 @@
 
 #pylint: disable=E1101, E1103
 
-import ConfigParser
 import subprocess
-import tempfile
 import unittest
 
 import mock
 import keystoneclient
-import glanceclient
-import novaclient
 
 from tempest_report import utils, settings
 
@@ -53,7 +49,7 @@ class KeystoneDummy(object):
         self.version = version
 
     def discover(self, _url):
-        if self.version==2:
+        if self.version == 2:
             return {'v2.0': {'url': 'http://127.0.0.1:5000/v2'}}
         return {'v3.0': {'url': 'http://127.0.0.1:5000/v3'},
                 'v2.0': {'url': 'http://127.0.0.1:5000/v2'}}
@@ -62,7 +58,7 @@ class KeystoneDummy(object):
 class UtilTest(unittest.TestCase):
     def test_get_smallest_flavor(self):
         class DummyFlavor(object):
-            def __init__(self, vcpus, disk, ram, *args, **kwargs):
+            def __init__(self, vcpus, disk, ram):
                 self.vcpus = vcpus
                 self.disk = disk
                 self.ram = ram
@@ -97,7 +93,7 @@ class UtilTest(unittest.TestCase):
 
     @mock.patch('subprocess.check_output')
     def test_executer(self, subprocess_mock):
-        subprocess_mock.return_value="output"
+        subprocess_mock.return_value = "output"
         success, output = utils.executer(
             "testname", "/dir/filename")
     
@@ -195,21 +191,21 @@ class UtilTest(unittest.TestCase):
 
     @mock.patch('keystoneclient.generic.client.Client')
     def test_get_keystone_client_v3(self, keystone):
-        keystone.return_value=KeystoneDummy()
+        keystone.return_value = KeystoneDummy()
 
         client = utils.get_keystone_client('http://127.0.0.1:5000')
         self.assertEqual(client, keystoneclient.v3.client)
 
     @mock.patch('keystoneclient.generic.client.Client')
     def test_get_keystone_client_v2(self, keystone):
-        keystone.return_value=KeystoneDummy(2)
+        keystone.return_value = KeystoneDummy(2)
 
         client = utils.get_keystone_client('http://127.0.0.1:5000')
         self.assertEqual(client, keystoneclient.v2_0.client)
 
     def test_get_smallest_image(self):
         class DummyImage(object):
-            def __init__(self, size, disk_format, status, *args, **kwargs):
+            def __init__(self, size, disk_format, status):
                 self.size = size
                 self.disk_format = disk_format
                 self.status = status
@@ -222,7 +218,8 @@ class UtilTest(unittest.TestCase):
 
         smallest_image = utils.get_smallest_image(images)
         self.assertEqual(smallest_image.size, 2)
-    
+   
+    # TODO
     def test_customized_tempest_conf(self):
         
         with open("testconf", "wb") as fileobj:
