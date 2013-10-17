@@ -2,22 +2,18 @@
 
 #pylint: disable=E1101, E1103
 
-from tempest_report import utils, settings
-
-import unittest
+import ConfigParser
+import subprocess
 import tempfile
+import unittest
 
 import mock
-import subprocess
-import ConfigParser
-
-from tempest_report.utils import customized_tempest_conf, get_smallest_flavor, get_smallest_image, get_services, get_tenants, ServiceSummary, service_summary, executer, get_images, get_flavors, get_keystone_client
-
 import keystoneclient
-from keystoneclient.generic import client
 import glanceclient
 import novaclient
-import requests
+
+from tempest_report import utils, settings
+from tempest_report.utils import get_smallest_flavor, get_smallest_image, get_services, get_tenants
 
 
 class DummyFileObject(object):
@@ -74,7 +70,7 @@ class UtilTest(unittest.TestCase):
         img_obj = DummyObj("image-uuid")
         utils.get_smallest_image = mock.Mock(return_value=img_obj)
         fileobj = DummyFileObject()
-        retval = customized_tempest_conf('user', 'password', 'url', fileobj)
+        retval = utils.customized_tempest_conf('user', 'password', 'url', fileobj)
         
         # TODO: check if config is valid
 
@@ -133,7 +129,7 @@ class UtilTest(unittest.TestCase):
 
             self.assertEqual(services, {'servicetype': 'url'})
             self.assertEqual(scoped_token, {'id': 'token'})
-            client.Client.assert_called_with()
+            keystoneclient.generic.client.Client.assert_called_with()
 
     def test_get_tenants(self):
         with mock.patch('keystoneclient.v3.client.Client') as keystone:
@@ -145,11 +141,11 @@ class UtilTest(unittest.TestCase):
         
             self.assertEqual(tenants, ['a tenant'])
             self.assertEqual(token, 'token')
-            client.Client.assert_called_with()
+            keystoneclient.generic.client.Client.assert_called_with()
 
     def test_executer(self):
         subprocess.check_output=mock.Mock(return_value="output") 
-        success, output = executer("testname", "/dir/filename")
+        success, output = utils.executer("testname", "/dir/filename")
         
         self.assertTrue(success)
         self.assertEqual(output, "output")
@@ -159,7 +155,7 @@ class UtilTest(unittest.TestCase):
         subprocess.check_output=mock.Mock(return_value="output")
         subprocess.check_output.side_effect = \
             subprocess.CalledProcessError(1, "command", "error")
-        success, output = executer("testname", "filename")
+        success, output = utils.executer("testname", "filename")
         
         self.assertFalse(success)
         self.assertEqual(output, "error")
@@ -175,7 +171,7 @@ class UtilTest(unittest.TestCase):
                         'release': 5},
             }):
             
-            summary = service_summary(successful_tests)
+            summary = utils.service_summary(successful_tests)
             
             assert 'A' in summary
             assert '1' in summary.get('A').features
@@ -184,7 +180,7 @@ class UtilTest(unittest.TestCase):
             self.assertEqual(summary.get('B').release_name, 'Essex')
 
     def test_summary_class(self):
-        summary = ServiceSummary('servicename')
+        summary = utils.ServiceSummary('servicename')
         self.assertEqual(summary.release_name, '')
         
         summary.set_release(5)
@@ -207,20 +203,20 @@ class UtilTest(unittest.TestCase):
         with mock.patch('glanceclient.Client') as glance:
             images = DummyImages()
             glance.return_value.images = images
-            retval = get_images("token_id", "http://url:5000/v2")
+            retval = utils.get_images("token_id", "http://url:5000/v2")
             self.assertEqual(retval, ['first image'])
 
         glance.assert_called_with(2, "http://url:5000", 
             token="token_id")
         
         with mock.patch('glanceclient.Client') as glance:
-            get_images("token_id", "http://url:35357/v1")
+            utils.get_images("token_id", "http://url:35357/v1")
 
         glance.assert_called_with(1, "http://url:35357",
             token="token_id")
 
         with mock.patch('glanceclient.Client') as glance:
-            get_images("token_id", "http://url/wrong")
+            utils.get_images("token_id", "http://url/wrong")
 
         glance.assert_called_with(1, "http://url",
             token="token_id")
@@ -233,7 +229,7 @@ class UtilTest(unittest.TestCase):
         with mock.patch('novaclient.v1_1.client.Client') as nova:
             flavors = DummyFlavors()
             nova.return_value.flavors = flavors
-            retval = get_flavors("user", "password",
+            retval = utils.get_flavors("user", "password",
                 "tenant_name", "url")
             self.assertEqual(retval, ['flavor'])
 
@@ -247,7 +243,7 @@ class UtilTest(unittest.TestCase):
         keystoneclient.generic.client.Client = mock.Mock(
             return_value=KeystoneDummy())
 
-        client = get_keystone_client('http://127.0.0.1:5000')
+        client = utils.get_keystone_client('http://127.0.0.1:5000')
         self.assertEqual(client, keystoneclient.v3.client)
 
     def test_get_keystone_client_v2(self):
@@ -257,5 +253,5 @@ class UtilTest(unittest.TestCase):
         keystoneclient.generic.client.Client = mock.Mock(
             return_value=KeystoneDummy())
 
-        client = get_keystone_client('http://127.0.0.1:5000')
+        client = utils.get_keystone_client('http://127.0.0.1:5000')
         self.assertEqual(client, keystoneclient.v2_0.client)
