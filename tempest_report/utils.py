@@ -87,8 +87,7 @@ def get_flavors(user, password, tenant_name, url):
     return nova_client.flavors.list()
 
 
-def get_smallest_flavor(user, password, tenant_name, keystone_url):
-    flavors = get_flavors(user, password, tenant_name, keystone_url)
+def get_smallest_flavor(flavors):
     smallest_flavor = flavors[0]
     for flavor in flavors:
         if flavor.vcpus <= smallest_flavor.vcpus:
@@ -181,7 +180,8 @@ def customized_tempest_conf(user, password, keystone_url, fileobj):
     tenant_name = tenants[0].name
     
     services, _scoped_token = get_services(tenant_name, token, keystone_url)
-    smallest_flavor = get_smallest_flavor(user, password, tenant_name, keystone_url)
+    flavors = get_flavors(user, password, tenant_name, keystone_url)
+    smallest_flavor = get_smallest_flavor(flavors)
     
     imageservice_url = services.get('image')
     images = get_images(_scoped_token.get('id'), imageservice_url)

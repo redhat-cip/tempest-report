@@ -60,8 +60,7 @@ class KeystoneDummy(object):
  
 
 class UtilTest(unittest.TestCase):
-    @mock.patch('tempest_report.utils.get_flavors') 
-    def test_get_smallest_flavor(self, flavors):
+    def test_get_smallest_flavor(self):
         class DummyFlavor(object):
             def __init__(self, vcpus, disk, ram, *args, **kwargs):
                 self.vcpus = vcpus
@@ -73,8 +72,7 @@ class UtilTest(unittest.TestCase):
         sample_flavors.append(DummyFlavor(1, 0, 64))
         sample_flavors.append(DummyFlavor(1, 1, 64))
 
-        flavors.return_value=sample_flavors
-        smallest_flavor = utils.get_smallest_flavor(0, 0, 0, 0)
+        smallest_flavor = utils.get_smallest_flavor(sample_flavors)
         self.assertEqual(smallest_flavor.disk, 0)
 
     @mock.patch('keystoneclient.v3.client')
@@ -224,3 +222,9 @@ class UtilTest(unittest.TestCase):
 
         smallest_image = utils.get_smallest_image(images)
         self.assertEqual(smallest_image.size, 2)
+    
+    def test_customized_tempest_conf(self):
+        
+        with open("testconf", "wb") as fileobj:
+            utils.customized_tempest_conf(
+                "demo", "devstack", "http://127.0.0.1:5000/v2.0", fileobj)
