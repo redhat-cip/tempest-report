@@ -13,32 +13,22 @@ description_list = {
     # Minimal tests that don't require an admin account
     'tempest.cli.simple_read_only.test_keystone:SimpleReadOnlyKeystoneClientTest.test_admin_discover': {
         'service': 'Identity Service (Keystone)',
-        'feature': '',
-        'release': 0,
     },
 
     'tempest.cli.simple_read_only.test_glance:SimpleReadOnlyGlanceClientTest.test_glance_image_list': {
         'service': 'Image Service (Glance)',
-        'feature': '',
-        'release': 0,
     },
 
     'tempest.cli.simple_read_only.test_compute:SimpleReadOnlyNovaClientTest.test_admin_list': {
         'service': 'Compute (Nova)',
-        'feature': '',
-        'release': 0,
     },
 
     'tempest.cli.simple_read_only.test_cinder:SimpleReadOnlyCinderClientTest.test_cinder_volumes_list': {
         'service': 'Volume Service (Cinder)',
-        'feature': '',
-        'release': 0,
     },
     
     'tempest.api.object_storage.test_container_services:ContainerTest.test_create_container': {
         'service': 'Object Storage (Swift)',
-        'feature': '',
-        'release': 0,
     },
 
     # End of minimal tests
@@ -80,7 +70,6 @@ description_list = {
     'tempest.api.object_storage.test_container_staticweb': {
         'service': 'Object Storage (Swift)',
         'feature': 'Static Web',
-        'release': 0,
     },
 
 
@@ -89,7 +78,6 @@ description_list = {
     'tempest_report.tempest_addons:NovaExtensionTest.test_volume_support': {
         'service': 'Compute (Nova)',
         'feature': 'Volume Support',
-        'release': 0,
     },
 
     'tempest_report.tempest_addons:NovaExtensionTest.test_multinic': {
@@ -120,8 +108,7 @@ description_list = {
 
     'tempest_report.tempest_addons:GlanceTest': {
         'service': 'Image Service (Glance)',
-        'feature': '',
-        'release': 6,
     },
+
 
 }

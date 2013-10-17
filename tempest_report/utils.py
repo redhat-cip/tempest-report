@@ -43,7 +43,7 @@ def service_summary(successful_tests):
         result = settings.description_list.get(str(test))
         if result:
             service = result.get('service')
-            release = result.get('release')
+            release = result.get('release', 0)
             feature = result.get('feature')
             
             if not service in services:
