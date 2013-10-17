@@ -198,16 +198,14 @@ def customized_tempest_conf(user, password, keystone_url, fileobj):
     
     tempest_config = ConfigParser.SafeConfigParser()
     tempest_config.set('DEFAULT', 'use_stderr', 'False')
-    
+
+    # Create empty sections 
     for section, settings in vars(cfg).items():
-        for name, value in settings.items():
-            if not tempest_config.has_section(section):
-                tempest_config.add_section(section)
-            value = str(value)
-            tempest_config.set(section, name, value)
-    
+        if not tempest_config.has_section(section):
+            tempest_config.add_section(section)
+
+    # Essential settings
     tempest_config.set('identity', 'uri', services.get('identity') + '/')
-    tempest_config.set('identity', 'uri_v3', "")
     
     tempest_config.set('identity', 'username', user)
     tempest_config.set('identity', 'alt_username', user)
