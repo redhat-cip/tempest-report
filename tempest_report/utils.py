@@ -194,6 +194,13 @@ def customized_tempest_conf(user, password, keystone_url, fileobj):
     images = get_images(_scoped_token.get('id'), imageservice_url)
     smallest_image = get_smallest_image(images)
     
+    write_conf(user, password, keystone_url, tenant, 
+        smallest_image.id, smallest_flavor.id, fileobj)
+
+
+def write_conf(user, password, keystone_url, tenant, 
+        image_id, flavor_id, fileobj):
+    
     cfg = tempest.config.TempestConfig()
     
     tempest_config = ConfigParser.SafeConfigParser()
@@ -205,7 +212,7 @@ def customized_tempest_conf(user, password, keystone_url, fileobj):
             tempest_config.add_section(section)
 
     # Essential settings
-    tempest_config.set('identity', 'uri', services.get('identity') + '/')
+    tempest_config.set('identity', 'uri', keystone_url)
     
     tempest_config.set('identity', 'username', user)
     tempest_config.set('identity', 'alt_username', user)
@@ -215,18 +222,17 @@ def customized_tempest_conf(user, password, keystone_url, fileobj):
     tempest_config.set('identity', 'alt_password', password)
     tempest_config.set('identity', 'admin_password', password)
     
-    tempest_config.set('identity', 'tenant_name', tenant_name)
-    tempest_config.set('identity', 'alt_tenant_name', tenant_name)
-    tempest_config.set('identity', 'admin_tenant_name', tenant_name)
-    tempest_config.set('identity', 'admin_role', tenant_name)
+    tempest_config.set('identity', 'tenant_name', tenant)
+    tempest_config.set('identity', 'alt_tenant_name', tenant)
+    tempest_config.set('identity', 'admin_tenant_name', tenant)
+    tempest_config.set('identity', 'admin_role', tenant)
     
-    tempest_config.set('object_storage', 'operator_role', tenant_name)
+    tempest_config.set('object_storage', 'operator_role', tenant)
     
-    tempest_config.set('compute', 'image_ref', smallest_image.id)
-    tempest_config.set('compute', 'image_ref_alt', smallest_image.id)
+    tempest_config.set('compute', 'image_ref', image_id)
+    tempest_config.set('compute', 'image_ref_alt', image_id)
     tempest_config.set('compute', 'allow_tenant_isolation', "False")
-    tempest_config.set('compute', 'flavor_ref', smallest_flavor.id)
-    tempest_config.set('compute', 'flavor_ref_alt', smallest_flavor.id)
+    tempest_config.set('compute', 'flavor_ref', flavor_id)
+    tempest_config.set('compute', 'flavor_ref_alt', flavor_id)
     
-    with fileobj:
-        tempest_config.write(fileobj)
+    tempest_config.write(fileobj)
