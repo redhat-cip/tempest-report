@@ -82,12 +82,17 @@ def executer(testname, configfile):
 
 
 def get_flavors(user, password, tenant_name, url):
+    """ Returns list of available flavors """ 
+
+    #TODO: auto-detect version
     client_class = novaclient.client.get_client_class(2)
     nova_client = client_class(user, password, tenant_name, url)
     return nova_client.flavors.list()
 
 
 def get_smallest_flavor(flavors):
+    """ Takes a list of flavors and returns smallest one """
+
     smallest_flavor = flavors[0]
     for flavor in flavors:
         if flavor.vcpus <= smallest_flavor.vcpus:
@@ -126,13 +131,13 @@ def get_tenants(user, password, keystone_url):
 def get_services(tenant_name, token_id, keystone_url):
     """ Returns list of services and a scoped token """
 
-    services = {}
-
     keystone_client = get_keystone_client(keystone_url)   
     keystone = keystone_client.Client(auth_url=keystone_url,
                              token=token_id,
                              tenant_name=tenant_name)
- 
+
+    # Create a dict of servicetype: endpoints
+    services = {}
     for service in keystone.auth_ref['serviceCatalog']:
         service_type = service['type']
         endpoint = service['endpoints'][0]['publicURL']
@@ -177,6 +182,8 @@ def get_smallest_image(images):
 
 def customized_tempest_conf(user, password, keystone_url, fileobj):
     tenants, token = get_tenants(user, password, keystone_url)
+    
+    # TODO: really choose first found tenant?
     tenant_name = tenants[0].name
     
     services, _scoped_token = get_services(tenant_name, token, keystone_url)
