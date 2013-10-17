@@ -58,12 +58,14 @@ class KeystoneDummy(object):
 class UtilTest(unittest.TestCase):
     def test_customized_tempest_conf(self):
         class DummyObj(object):
-            def __init__(self, id, *args, **kwargs):
+            def __init__(self, id=None, *args, **kwargs):
                 self.id = id
+                self.name = 'tenant_name'
+
+        tenant = DummyObj()
 
         utils.get_tenants = mock.Mock(return_value=(
-            [{'id': 'tenant_id', 'name': 'tenant_name'}, ], 
-            'token'))
+            [tenant], 'token'))
         utils.get_services = mock.Mock(return_value=
             ({'identity': 'none'}, 'scoped_token'))
         
@@ -100,8 +102,14 @@ class UtilTest(unittest.TestCase):
                 self.disk_format = disk_format
                 self.status = status
 
+        class DummyObject(object):
+            def __init__(self):
+                self.name = 'tenant_name'
+
+        tenant = DummyObject()
+
         utils.get_tenants = mock.Mock(return_value=
-            ([{'name': 'tenant_name'}], 'token'))
+            ([tenant], 'token'))
         utils.get_services = mock.Mock(return_value=
             ({'image': 'url'}, {'id': 'scoped_token'}))
 

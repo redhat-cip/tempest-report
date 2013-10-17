@@ -6,7 +6,6 @@ import os
 import subprocess
 import urlparse
 
-
 import keystoneclient.generic.client
 import keystoneclient.v2_0
 import keystoneclient.v3
@@ -167,7 +166,7 @@ def get_smallest_image(user, password, keystone_url):
     smallest_image = None
     for tenant in tenants:
         services, scoped_token = get_services(
-            tenant['name'], token, keystone_url)
+            tenant.name, token, keystone_url)
         imageservice_url = services.get('image')
         if imageservice_url:
             images = get_images(scoped_token['id'], imageservice_url)
@@ -185,7 +184,7 @@ def get_smallest_image(user, password, keystone_url):
 
 def customized_tempest_conf(user, password, keystone_url, fileobj):
     tenants, token = get_tenants(user, password, keystone_url)
-    tenant_name = tenants[0]['name'] 
+    tenant_name = tenants[0].name
     
     services, _scoped_token = get_services(tenant_name, token, keystone_url)
     smallest_flavor = get_smallest_flavor(user, password, tenant_name, keystone_url)
