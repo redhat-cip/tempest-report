@@ -158,27 +158,21 @@ def get_images(token_id, url):
     return [img for img in glance.images.list()]
 
 
-def get_smallest_image(user, password, keystone_url):
-    """ Returns the smallest active image from Glance """
-
-    tenants, token = get_tenants(user, password, keystone_url)
+def get_smallest_image(images):
+    """ Returns the smallest active image from an image list """
+    
     size = None
     smallest_image = None
-    for tenant in tenants:
-        services, scoped_token = get_services(
-            tenant.name, token, keystone_url)
-        imageservice_url = services.get('image')
-        if imageservice_url:
-            images = get_images(scoped_token['id'], imageservice_url)
-            for img in images:
-                if size is None:
-                    size = img.size
-                    smallest_image = img  
-                if (img.size < size and 
-                    img.disk_format in ['qcow2', 'ami'] and
-                    img.status == 'active'):
-                    size = img.size
-                    smallest_image = img  
+
+    for img in images:
+        if size is None:
+            size = img.size
+            smallest_image = img  
+        if (img.size < size and 
+            img.disk_format in ['qcow2', 'ami'] and
+            img.status == 'active'):
+            size = img.size
+            smallest_image = img  
     return smallest_image
 
 
@@ -189,7 +183,9 @@ def customized_tempest_conf(user, password, keystone_url, fileobj):
     services, _scoped_token = get_services(tenant_name, token, keystone_url)
     smallest_flavor = get_smallest_flavor(user, password, tenant_name, keystone_url)
     
-    smallest_image = get_smallest_image(user, password, keystone_url)
+    imageservice_url = services.get('image')
+    images = get_images(_scoped_token.get('id'), imageservice_url)
+    smallest_image = get_smallest_image(images)
     
     cfg = tempest.config.TempestConfig()
     
@@ -200,8 +196,8 @@ def customized_tempest_conf(user, password, keystone_url, fileobj):
         for name, value in settings.items():
             if not tempest_config.has_section(section):
                 tempest_config.add_section(section)
-                value = str(value)
-                tempest_config.set(section, name, value)
+            value = str(value)
+            tempest_config.set(section, name, value)
     
     tempest_config.set('identity', 'uri', services.get('identity') + '/')
     tempest_config.set('identity', 'uri_v3', "")
