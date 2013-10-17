@@ -1,29 +1,24 @@
 # Copyright (C) 2013 eNovance SAS <licensing@enovance.com>
+#pylint:disable=E1101
 
+import ConfigParser
 import os
-import pkgutil
 import subprocess
-from urlparse import urlparse
+import urlparse
 
-import requests
-
-from tempest_report import settings
-from tempest_report.settings import name_mapping
 
 import keystoneclient.generic.client
 import keystoneclient.v2_0
 import keystoneclient.v3
 import glanceclient
 import novaclient.client
+import tempest.config
 
-from tempest import config
-import tempfile
-import ConfigParser
-import sys
+from tempest_report import settings
 
 
 class ServiceSummary(object):
-    def __init__(self, name, *args, **kwargs):
+    def __init__(self, name, *_args, **_kwargs):
         self.name = name 
         self.release = 0
         self.features = []
@@ -66,14 +61,8 @@ def executer(testname, configfile):
 
     _environ = dict(os.environ)
 
-    config_dir = os.path.dirname(configfile) 
-    config_file = os.path.basename(configfile) 
-
-    if config_dir:
-        os.environ['TEMPEST_CONFIG_DIR'] = config_dir
-
-    if config_file:
-        os.environ['TEMPEST_CONFIG'] = config_file
+    os.environ['TEMPEST_CONFIG_DIR'] = os.path.dirname(configfile) 
+    os.environ['TEMPEST_CONFIG'] = os.path.basename(configfile) 
    
     success = False
     output = None
@@ -93,7 +82,7 @@ def executer(testname, configfile):
     return (success, output)
 
 
-def get_flavors(user, password, tenant_name, url, token=None):
+def get_flavors(user, password, tenant_name, url):
     client_class = novaclient.client.get_client_class(2)
     nova_client = client_class(user, password, tenant_name, url)
     return nova_client.flavors.list()
@@ -115,6 +104,7 @@ def get_keystone_client(keystone_url):
     
     root = keystoneclient.generic.client.Client()
     versions = root.discover(keystone_url)
+    
     keystone_url = versions.get('v3.0', {}).get('url')
     if keystone_url:
         return keystoneclient.v3.client
@@ -130,14 +120,9 @@ def get_tenants(user, password, keystone_url):
     keystone = keystone_client.Client(username=user,
                              password=password,
                              auth_url=keystone_url)
-    token_id = keystone.auth_ref['token']['id']
-    
-    headers = {'X-Auth-Token': token_id}
-    tenant_url = keystone_url + "tenants"
-    response = requests.get(tenant_url, headers=headers)
-    data = response.json()
-    
-    return (data['tenants'], token_id)
+
+    return (keystone.tenants.findall(),
+            keystone.auth_ref['token']['id'])
 
 
 def get_services(tenant_name, token_id, keystone_url):
@@ -149,7 +134,7 @@ def get_services(tenant_name, token_id, keystone_url):
     keystone = keystone_client.Client(auth_url=keystone_url,
                              token=token_id,
                              tenant_name=tenant_name)
-    
+ 
     for service in keystone.auth_ref['serviceCatalog']:
         service_type = service['type']
         endpoint = service['endpoints'][0]['publicURL']
@@ -168,7 +153,7 @@ def get_images(token_id, url):
     except ValueError:
         version = 1
 
-    parsed = urlparse(url)
+    parsed = urlparse.urlparse(url)
     url = "%s://%s" % (parsed.scheme, parsed.netloc)
     glance = glanceclient.Client(version, url, token=token_id)
     return [img for img in glance.images.list()]
@@ -200,15 +185,14 @@ def get_smallest_image(user, password, keystone_url):
 
 def customized_tempest_conf(user, password, keystone_url, fileobj):
     tenants, token = get_tenants(user, password, keystone_url)
-    tenant_id = tenants[0]['id'] 
     tenant_name = tenants[0]['name'] 
     
-    services, scoped_token = get_services(tenant_name, token, keystone_url)
+    services, _scoped_token = get_services(tenant_name, token, keystone_url)
     smallest_flavor = get_smallest_flavor(user, password, tenant_name, keystone_url)
     
     smallest_image = get_smallest_image(user, password, keystone_url)
     
-    cfg = config.TempestConfig()
+    cfg = tempest.config.TempestConfig()
     
     tempest_config = ConfigParser.SafeConfigParser()
     tempest_config.set('DEFAULT', 'use_stderr', 'False')

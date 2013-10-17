@@ -36,6 +36,10 @@ class DummyFileObject(object):
 
 
 class KeystoneDummy(object):
+    class Tenants(object):
+        def findall(self):
+            return ['a tenant']
+
     def __init__(self, *_args, **_kwargs):
         self.auth_ref = {'token': {'id': 'token'}, 
                          'serviceCatalog': [{
@@ -44,9 +48,12 @@ class KeystoneDummy(object):
                                  'publicURL': 'url'
                             }],
                         }]}
+        self.tenants = self.Tenants()
+
     def discover(self, _url):
         return {'v3.0': {'url': 'http://127.0.0.1:5000/v3'},
                 'v2.0': {'url': 'http://127.0.0.1:5000/v2'}}
+
 
 class UtilTest(unittest.TestCase):
     def test_customized_tempest_conf(self):
@@ -109,39 +116,28 @@ class UtilTest(unittest.TestCase):
         self.assertEqual(smallest_image.size, 2)
 
     def test_get_services(self):
+        with mock.patch('keystoneclient.v3.client.Client') as keystone:
+            
+            keystone.return_value = KeystoneDummy()
 
-        ks = KeystoneDummy()
-        client.Client = mock.Mock(return_value=ks)
-        requests.get = mock.Mock(return_value=KeystoneDummy())
-        keystoneclient.v2_0.client.Client = mock.Mock(return_value=KeystoneDummy())
-        keystoneclient.v3.client.Client = mock.Mock(return_value=KeystoneDummy())
-
-        services, scoped_token = get_services("tenant_name",
+            services, scoped_token = get_services("tenant_name",
             "token_id", "keystone_url")
-        self.assertEqual(services, {'servicetype': 'url'})
-        self.assertEqual(scoped_token, {'id': 'token'})
-        client.Client.assert_called_with()
+
+            self.assertEqual(services, {'servicetype': 'url'})
+            self.assertEqual(scoped_token, {'id': 'token'})
+            client.Client.assert_called_with()
 
     def test_get_tenants(self):
-        class DummyResponse(object):
-            def __init__(self, *args, **kwargs):
-                self.auth_ref = {'token': {'id': 'token'}}
+        with mock.patch('keystoneclient.v3.client.Client') as keystone:
+            
+            keystone.return_value = KeystoneDummy()
 
-            def json(self, *_args, **_kwargs):
-                return {'tenants': 'tenants'}
-
-        ks = KeystoneDummy()
-        client.Client = mock.Mock(return_value=ks)
-        requests.get = mock.Mock(return_value=DummyResponse())
-        keystoneclient.v2_0.client.Client = mock.Mock(return_value=DummyResponse())
-
-
-        tenants, token = get_tenants("user",
-            "password", "http://127.0.0.1")
+            tenants, token = get_tenants("user",
+                "password", "http://127.0.0.1")
         
-        self.assertEqual(tenants, 'tenants')
-        self.assertEqual(token, 'token')
-        client.Client.assert_called_with()
+            self.assertEqual(tenants, ['a tenant'])
+            self.assertEqual(token, 'token')
+            client.Client.assert_called_with()
 
     def test_executer(self):
         subprocess.check_output=mock.Mock(return_value="output") 
