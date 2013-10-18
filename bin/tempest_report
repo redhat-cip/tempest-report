@@ -18,7 +18,7 @@ def main(user, password, keystone_url, max_test_level=1, verbose=False):
     successful_tests = [] 
     for test, values in settings.description_list.items():
         test_level = values.get('level', 1)
-        if test_level <= max_test_level:
+        if int(test_level) <= int(max_test_level):
             success, output = executer(test, configfile.name)
             if verbose:
                 print output
