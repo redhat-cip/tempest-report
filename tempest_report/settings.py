@@ -105,5 +105,31 @@ description_list = {
         'release': 6
     },
 
+    # Scenario Tests
+    # These are long-running tests and thus require detail level 3 or more
+
+    'tempest.scenario.test_dashboard_basic_ops': {
+        'service': 'Scenario',
+        'level': 3,
+        'feature': 'Dashboard (Horizon)',
+    },
+
+   'tempest.scenario.test_large_ops': {
+        'service': 'Scenario',
+        'level': 3,
+        'feature': 'Large Operation Scenario',
+    },
+
+    'tempest.scenario.test_minimum_basic': {
+        'service': 'Scenario',
+        'level': 3,
+        'feature': 'Minimum Scenario (Nova, Glance, Conder)',
+    },
+
+    'tempest.scenario.test_network_basic_ops': {
+        'service': 'Scenario',
+        'level': 3,
+        'feature': 'Nova + Neutron'
+    },
 
 }
