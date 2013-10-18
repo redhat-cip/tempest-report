@@ -194,7 +194,7 @@ def customized_tempest_conf(user, password, keystone_url, fileobj):
     images = get_images(_scoped_token.get('id'), imageservice_url)
     smallest_image = get_smallest_image(images)
     
-    write_conf(user, password, keystone_url, tenant, 
+    write_conf(user, password, keystone_url, tenant_name, 
         smallest_image.id, smallest_flavor.id, fileobj)
 
 
