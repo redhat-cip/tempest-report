@@ -11,7 +11,7 @@ from tempest_report.utils import service_summary, executer, customized_tempest_c
 from tempest_report import settings
 
 
-def main(user, password, keystone_url, max_test_level=1):
+def main(user, password, keystone_url, max_test_level=1, verbose=False):
     configfile = tempfile.NamedTemporaryFile(delete=False)
     customized_tempest_conf(user, password, keystone_url, configfile)
 
@@ -20,6 +20,8 @@ def main(user, password, keystone_url, max_test_level=1):
         test_level = values.get('level', 1)
         if test_level <= max_test_level:
             success, output = executer(test, configfile.name)
+            if verbose:
+                print output
             if success:
                 successful_tests.append(test)
                 print "OK: %s" % test
@@ -35,6 +37,7 @@ def main(user, password, keystone_url, max_test_level=1):
 if __name__ == '__main__':
     parser = optparse.OptionParser(usage='''
 usage: %%prog [--level <detail level>]
+             [--verbose]
              [--os-username <auth-user-name>]
              [--os-password <auth-password>]
              [--os-auth-url <auth-url>]
@@ -45,9 +48,10 @@ Examples:
   %%prog --os-auth-url http://127.0.0.1:5000 \\
       --os-username user --os-password password --level 2
 '''.strip('\n') % globals())
-
     parser.add_option('-l', '--level', dest='level',
                       default=1, help='Increase test level')
+    parser.add_option("-v", '--verbose', action="store_true", dest="verbose",
+                      help='Increase verbosity')
     parser.add_option('--os-username',
                       default=os.environ.get('OS_USERNAME'),
                       metavar='<auth-user-name>',
@@ -67,4 +71,4 @@ Examples:
         parser.print_usage()
         sys.exit(1)
 
-    main(options.os_username, options.os_password, options.os_auth_url, options.level)
+    main(options.os_username, options.os_password, options.os_auth_url, options.level, options.verbose)
