@@ -1,33 +1,28 @@
 #!/usr/bin/python -u
 # Copyright (C) 2013 eNovance SAS <licensing@enovance.com>
 
-import os
-import tempfile
 import ConfigParser
+import optparse
+import os
+import sys
+import tempfile
 
 from tempest_report.utils import service_summary, executer, customized_tempest_conf
 from tempest_report import settings
 
-def main():
-    user = os.environ.get('OS_USERNAME', None)
-    password = os.environ.get('OS_PASSWORD', None)
-    keystone_url = os.environ.get('OS_AUTH_URL', None)
 
-    if not (user and password and keystone_url):
-        print "Please set OS_USERNAME, OS_PASSWORD and OS_AUTH_URL. Using local devstack defaults."
-        user = "demo"
-        password = "devstack"
-        keystone_url = "http://127.0.0.1:5000"
-
+def main(user, password, keystone_url, max_test_level=1):
     configfile = tempfile.NamedTemporaryFile(delete=False)
     customized_tempest_conf(user, password, keystone_url, configfile)
 
     successful_tests = [] 
-    for test in settings.description_list:
-        success, output = executer(test, configfile.name)
-        if success:
-            successful_tests.append(test)
-            print "OK: %s" % test
+    for test, values in settings.description_list.items():
+        test_level = values.get('level', 1)
+        if test_level <= max_test_level:
+            success, output = executer(test, configfile.name)
+            if success:
+                successful_tests.append(test)
+                print "OK: %s" % test
     
     for _, service in service_summary(successful_tests).items():
         print "\n%s: %s" % (service.name, service.release_name)
@@ -36,5 +31,40 @@ def main():
     
     os.remove(configfile.name)
 
-if __name__ == "__main__":
-    main()    
+
+if __name__ == '__main__':
+    parser = optparse.OptionParser(usage='''
+usage: %%prog [--level <detail level>]
+             [--os-username <auth-user-name>]
+             [--os-password <auth-password>]
+             [--os-auth-url <auth-url>]
+
+Command-line interface for OpenStack Tempest.
+
+Examples:
+  %%prog --os-auth-url http://127.0.0.1:5000 \\
+      --os-username user --os-password password --level 2
+'''.strip('\n') % globals())
+
+    parser.add_option('-l', '--level', dest='level',
+                      default=1, help='Increase test level')
+    parser.add_option('--os-username',
+                      default=os.environ.get('OS_USERNAME'),
+                      metavar='<auth-user-name>',
+                      help='Openstack username. Defaults to env[OS_USERNAME].')
+    parser.add_option('--os-password',
+                      default=os.environ.get('OS_PASSWORD'),
+                      metavar='<auth-password>',
+                      help='Openstack password. Defaults to env[OS_PASSWORD].')
+    parser.add_option('--os-auth-url',
+                      default=os.environ.get('OS_AUTH_URL'),
+                      metavar='<auth-url>',
+                      help='Openstack auth URL. Defaults to env[OS_AUTH_URL].')
+    
+    (options, args) = parser.parse_args()
+    
+    if not (options.os_username and options.os_password and options.os_auth_url):
+        parser.print_usage()
+        sys.exit(1)
+
+    main(options.os_username, options.os_password, options.os_auth_url, options.level)
