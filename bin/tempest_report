@@ -6,27 +6,46 @@ import optparse
 import os
 import sys
 import tempfile
+import Queue
+import threading
 
 from tempest_report.utils import service_summary, executer, customized_tempest_conf
 from tempest_report import settings
+
+
+def worker(queue, successful_tests, verbose=False):
+    while True:
+        testname, configfile_name = queue.get()
+        success, output = executer(testname, configfile_name)
+        if verbose:
+            print output
+        if success:
+            successful_tests.append(testname)
+            print "OK:  %s" % testname
+        else:
+            print "ERR: %s" % testname
+        queue.task_done()
 
 
 def main(user, password, keystone_url, max_test_level=1, verbose=False, tenant_name=None):
     configfile = tempfile.NamedTemporaryFile(delete=False)
     customized_tempest_conf(user, password, keystone_url, configfile, tenant_name)
 
+    queue = Queue.Queue()
     successful_tests = [] 
+
+    for _nr in range(4):
+        thread = threading.Thread(target=worker,
+            args=(queue, successful_tests, verbose))
+        thread.daemon = True
+        thread.start()
+    
     for test, values in settings.description_list.items():
         test_level = values.get('level', 1)
         if int(test_level) <= int(max_test_level):
-            success, output = executer(test, configfile.name)
-            if verbose:
-                print output
-            if success:
-                successful_tests.append(test)
-                print "OK:  %s" % test
-            else:
-                print "ERR: %s" % test
+            queue.put((test, configfile.name))
+
+    queue.join()
 
     for _, service in service_summary(successful_tests).items():
         print "\n%s: %s" % (service.name, service.release_name)
@@ -79,5 +98,8 @@ Examples:
         parser.print_usage()
         sys.exit(1)
     
-    main(options.os_username, options.os_password, options.os_auth_url,
+    try:
+        main(options.os_username, options.os_password, options.os_auth_url,
          options.level, options.verbose, options.os_tenant_name)
+    except KeyboardInterrupt:
+        sys.exit(1)
