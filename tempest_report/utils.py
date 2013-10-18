@@ -8,7 +8,6 @@ import urlparse
 
 import keystoneclient.generic.client
 import keystoneclient.v2_0
-import keystoneclient.v3
 import glanceclient
 import novaclient.client
 import tempest.config
@@ -103,24 +102,19 @@ def get_smallest_flavor(flavors):
 
 
 def get_keystone_client(keystone_url):
-    """ Tries to discover keystone and returns v3/v2 client """
+    """ Tries to discover keystone and returns v2 client """
     
     root = keystoneclient.generic.client.Client()
     versions = root.discover(keystone_url)
     
-    keystone_url = versions.get('v3.0', {}).get('url')
-    if keystone_url:
-        return keystoneclient.v3.client
-    
     keystone_url = versions.get('v2.0', {}).get('url')
     if keystone_url:
-        return keystoneclient.v2_0.client
+        return (keystoneclient.v2_0.client.Client, keystone_url)
     
 
-def get_tenants(user, password, keystone_url):
+def get_tenants(user, password, keystone_url, keystone_client):
     """ Authenticate user and return list of tenants """
-    keystone_client = get_keystone_client(keystone_url)   
-    keystone = keystone_client.Client(username=user,
+    keystone = keystone_client(username=user,
                              password=password,
                              auth_url=keystone_url)
 
@@ -128,11 +122,10 @@ def get_tenants(user, password, keystone_url):
             keystone.auth_ref['token']['id'])
 
 
-def get_services(tenant_name, token_id, keystone_url):
+def get_services(tenant_name, token_id, keystone_url, keystone_client):
     """ Returns list of services and a scoped token """
 
-    keystone_client = get_keystone_client(keystone_url)   
-    keystone = keystone_client.Client(auth_url=keystone_url,
+    keystone = keystone_client(auth_url=keystone_url,
                              token=token_id,
                              tenant_name=tenant_name)
 
@@ -181,12 +174,14 @@ def get_smallest_image(images):
 
 
 def customized_tempest_conf(user, password, keystone_url, fileobj):
-    tenants, token = get_tenants(user, password, keystone_url)
+    keystone_client, keystone_url = get_keystone_client(keystone_url)   
+    tenants, token = get_tenants(user, password, keystone_url, keystone_client)
     
     # TODO: really choose first found tenant?
     tenant_name = tenants[0].name
+
+    services, _scoped_token = get_services(tenant_name, token, keystone_url, keystone_client)
     
-    services, _scoped_token = get_services(tenant_name, token, keystone_url)
     flavors = get_flavors(user, password, tenant_name, keystone_url)
     smallest_flavor = get_smallest_flavor(flavors)
     

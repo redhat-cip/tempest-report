@@ -37,7 +37,7 @@ class KeystoneDummy(object):
             tenant = Tenant()
             return [tenant]
 
-    def __init__(self, version=None, *_args, **_kwargs):
+    def __init__(self, *_args, **_kwargs):
         self.auth_ref = {'token': {'id': 'token'}, 
                          'serviceCatalog': [{
                              'type': 'servicetype',
@@ -46,13 +46,9 @@ class KeystoneDummy(object):
                             }],
                         }]}
         self.tenants = self.Tenants()
-        self.version = version
 
     def discover(self, _url):
-        if self.version == 2:
-            return {'v2.0': {'url': 'http://127.0.0.1:5000/v2'}}
-        return {'v3.0': {'url': 'http://127.0.0.1:5000/v3'},
-                'v2.0': {'url': 'http://127.0.0.1:5000/v2'}}
+        return {'v2.0': {'url': 'http://127.0.0.1:5000/v2'}}
  
 
 class UtilTest(unittest.TestCase):
@@ -71,22 +67,18 @@ class UtilTest(unittest.TestCase):
         smallest_flavor = utils.get_smallest_flavor(sample_flavors)
         self.assertEqual(smallest_flavor.disk, 0)
 
-    @mock.patch('keystoneclient.v3.client')
+    @mock.patch('keystoneclient.v2_0.client')
     def test_get_services(self, keystone):
-        keystone.Client.return_value = KeystoneDummy()
-
         services, scoped_token = utils.get_services("tenant_name",
-            "token_id", "http://127.0.0.1:5000")
+            "token_id", "http://127.0.0.1:5000", KeystoneDummy)
 
         self.assertEqual(services, {'servicetype': 'url'})
         self.assertEqual(scoped_token, {'id': 'token'})
 
-    @mock.patch('keystoneclient.v3.client')
+    @mock.patch('keystoneclient.v2_0.client')
     def test_get_tenants(self, keystone):
-        keystone.Client.return_value = KeystoneDummy()
-        
         tenants, token = utils.get_tenants("user",
-                "password", "http://127.0.0.1:5000")
+                "password", "http://127.0.0.1:5000", KeystoneDummy)
 
         self.assertTrue(isinstance(tenants[0], Tenant))
         self.assertEqual(token, 'token')
@@ -190,18 +182,12 @@ class UtilTest(unittest.TestCase):
         "tenant_name", "url")
 
     @mock.patch('keystoneclient.generic.client.Client')
-    def test_get_keystone_client_v3(self, keystone):
+    def test_get_keystone_client_v2(self, keystone):
         keystone.return_value = KeystoneDummy()
 
-        client = utils.get_keystone_client('http://127.0.0.1:5000')
-        self.assertEqual(client, keystoneclient.v3.client)
-
-    @mock.patch('keystoneclient.generic.client.Client')
-    def test_get_keystone_client_v2(self, keystone):
-        keystone.return_value = KeystoneDummy(2)
-
-        client = utils.get_keystone_client('http://127.0.0.1:5000')
-        self.assertEqual(client, keystoneclient.v2_0.client)
+        client, url = utils.get_keystone_client('http://127.0.0.1:5000')
+        self.assertEqual(client, keystoneclient.v2_0.client.Client)
+        self.assertEqual(url, 'http://127.0.0.1:5000/v2')
 
     def test_get_smallest_image(self):
         class DummyImage(object):
