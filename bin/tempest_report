@@ -2,6 +2,8 @@
 # Copyright (C) 2013 eNovance SAS <licensing@enovance.com>
 
 import ConfigParser
+import datetime
+import logging
 import optparse
 import os
 import sys
@@ -14,20 +16,40 @@ from tempest_report import settings
 
 
 def worker(queue, successful_tests, verbose=False):
+    logger = logging.getLogger('tempest_report')
     while True:
         testname, configfile_name = queue.get()
         success, output = executer(testname, configfile_name)
-        if verbose:
-            print output
+        
+        logger.debug(output)
+        
         if success:
             successful_tests.append(testname)
-            print "OK:  %s" % testname
+            msg = "OK:  %s" % testname
         else:
-            print "ERR: %s" % testname
+            msg = "ERR: %s" % testname
+        
+        if verbose:
+            logger.info(msg)
+        
         queue.task_done()
 
 
 def main(user, password, keystone_url, max_test_level=1, verbose=False, tenant_name=None):
+
+    now = datetime.datetime.now()
+    logfile = "tempest_report-%s.log" % now.strftime("%Y%m%d-%H%M%S")
+    print "Full test output logged to %s" % logfile
+
+    logger = logging.getLogger('tempest_report')
+    logger.setLevel(logging.DEBUG)
+    loghandle = logging.FileHandler(logfile)
+    loghandle.setLevel(logging.DEBUG)
+    logger.addHandler(loghandle)
+    console = logging.StreamHandler()
+    console.setLevel(logging.INFO)
+    logger.addHandler(console)
+
     configfile = tempfile.NamedTemporaryFile(delete=False)
     customized_tempest_conf(user, password, keystone_url, configfile, tenant_name)
 
@@ -48,9 +70,9 @@ def main(user, password, keystone_url, max_test_level=1, verbose=False, tenant_n
     queue.join()
 
     for _, service in service_summary(successful_tests).items():
-        print "\n%s: %s" % (service.name, service.release_name)
+        logger.info("\n%s: %s" % (service.name, service.release_name))
         for feature in service.features:
-            print "\t\t\t\t%s" % (feature,)
+            logger.info("\t\t\t\t%s" % (feature,))
     
     os.remove(configfile.name)
 
@@ -97,7 +119,10 @@ Examples:
     if not (options.os_username and options.os_password and options.os_auth_url):
         parser.print_usage()
         sys.exit(1)
-    
+      
+    if not options.verbose:
+        print "Executing tests in background, this might take a while."
+
     try:
         main(options.os_username, options.os_password, options.os_auth_url,
          options.level, options.verbose, options.os_tenant_name)
