@@ -229,4 +229,5 @@ def write_conf(user, password, keystone_url, tenant,
     tempest_config.set('compute', 'flavor_ref', flavor_id)
     tempest_config.set('compute', 'flavor_ref_alt', flavor_id)
     
-    tempest_config.write(fileobj)
+    with fileobj:
+        tempest_config.write(fileobj)
