@@ -19,7 +19,7 @@ description_list = {
         'service': 'Image Service (Glance)',
     },
 
-    'tempest.cli.simple_read_only.test_compute:SimpleReadOnlyNovaClientTest.test_admin_list': {
+    'tempest.cli.simple_read_only.test_nova:SimpleReadOnlyNovaClientTest.test_admin_list': {
         'service': 'Compute (Nova)',
     },
 
@@ -43,12 +43,6 @@ description_list = {
         'release': 7,
     },
 
-    'tempest.api.object_storage.test_object_expiry': {
-        'service': 'Object Storage (Swift)',
-        'feature': 'Expiring Objects',
-        'release': 5,
-    },
-    
     'tempest.api.object_storage.test_object_version': {
         'service': 'Object Storage (Swift)',
         'feature': 'Object versioning',
@@ -59,12 +53,6 @@ description_list = {
         'service': 'Object Storage (Swift)',
         'feature': 'Temporary object URL',
         'release': 5,
-    },
-
-    'tempest.api.object_storage.test_container_sync': {
-        'service': 'Object Storage (Swift)',
-        'feature': 'Container sync',
-        'release': 6,
     },
 
     'tempest.api.object_storage.test_container_staticweb': {
@@ -106,8 +94,15 @@ description_list = {
 
     # Glance
 
-    'tempest_report.tempest_addons:GlanceTest': {
+    'tempest_report.tempest_addons:GlanceV1Test': {
         'service': 'Image Service (Glance)',
+        'feature': 'V1 Api',
+    },
+
+    'tempest_report.tempest_addons:GlanceV2Test': {
+        'service': 'Image Service (Glance)',
+        'feature': 'V2 Api',
+        'release': 6
     },
 
 

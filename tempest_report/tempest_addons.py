@@ -37,8 +37,15 @@ class NovaExtensionTest(tempest.api.compute.base.BaseComputeTest):
         self.assertIn("os-user-data", self.extensions)
 
 
-class GlanceTest(tempest.api.image.base.BaseV2ImageTest):
+class GlanceV2Test(tempest.api.image.base.BaseV2ImageTest):
 
+    def test_list_images(self):
+        resp, images_list = self.client.image_list()
+        self.assertEqual(resp['status'], '200')
+        self.assertTrue(len(images_list) > 0)
+
+class GlanceV1Test(tempest.api.image.base.BaseV1ImageTest):
+    
     def test_list_images(self):
         resp, images_list = self.client.image_list()
         self.assertEqual(resp['status'], '200')
