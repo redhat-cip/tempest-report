@@ -24,8 +24,10 @@ def main(user, password, keystone_url, max_test_level=1, verbose=False):
                 print output
             if success:
                 successful_tests.append(test)
-                print "OK: %s" % test
-    
+                print "OK:  %s" % test
+            else:
+                print "ERR: %s" % test
+
     for _, service in service_summary(successful_tests).items():
         print "\n%s: %s" % (service.name, service.release_name)
         for feature in service.features:
