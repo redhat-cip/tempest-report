@@ -59,12 +59,14 @@ def main(user, password, keystone_url, max_test_level=1, verbose=False, tenant_n
 
     queue = Queue.Queue()
     successful_tests = [] 
-
+    all_tests = []
+    
     for test, values in settings.description_list.items():
         test_level = values.get('level', 1)
         if int(test_level) <= int(max_test_level):
             queue.put((test, configfile.name))
-    
+            all_tests.append(test)
+
     threads = []
     for _nr in range(4):
         thread = threading.Thread(target=worker,
@@ -80,7 +82,18 @@ def main(user, password, keystone_url, max_test_level=1, verbose=False, tenant_n
             time.sleep(1)
         except KeyboardInterrupt:
             break
+    
+    failed_tests = [t for t in all_tests if t not in successful_tests]
+    if failed_tests:
+        logger.info("\nFailed tests:")
+        for test in failed_tests:
+            logger.info(test)
 
+    if successful_tests:
+        logger.info("\nSuccessful tests:")
+        for test in successful_tests:
+            logger.info(test)
+ 
     for _, service in service_summary(successful_tests).items():
         logger.info("\n%s: %s" % (service.name, service.release_name))
         for feature in service.features:
