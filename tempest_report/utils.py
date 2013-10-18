@@ -80,11 +80,10 @@ def executer(testname, configfile):
     return (success, output)
 
 
-def get_flavors(user, password, tenant_name, url):
+def get_flavors(user, password, tenant_name, url, version=2):
     """ Returns list of available flavors """ 
 
-    #TODO: auto-detect version
-    client_class = novaclient.client.get_client_class(2)
+    client_class = novaclient.client.get_client_class(version)
     nova_client = client_class(user, password, tenant_name, url)
     return nova_client.flavors.list()
 
