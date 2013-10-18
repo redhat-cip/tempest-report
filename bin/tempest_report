@@ -5,10 +5,11 @@ import datetime
 import logging
 import optparse
 import os
+import Queue
 import sys
 import tempfile
-import Queue
 import threading
+import time
 
 from tempest_report.utils import service_summary, executer, customized_tempest_conf
 from tempest_report import settings
@@ -17,7 +18,11 @@ from tempest_report import settings
 def worker(queue, successful_tests, verbose=False):
     logger = logging.getLogger('tempest_report')
     while True:
-        testname, configfile_name = queue.get()
+        try:
+            testname, configfile_name = queue.get_nowait()
+        except Queue.Empty:
+            break
+        
         success, output = executer(testname, configfile_name)
         
         logger.debug(output)
@@ -55,18 +60,26 @@ def main(user, password, keystone_url, max_test_level=1, verbose=False, tenant_n
     queue = Queue.Queue()
     successful_tests = [] 
 
+    for test, values in settings.description_list.items():
+        test_level = values.get('level', 1)
+        if int(test_level) <= int(max_test_level):
+            queue.put((test, configfile.name))
+    
+    threads = []
     for _nr in range(4):
         thread = threading.Thread(target=worker,
             args=(queue, successful_tests, verbose))
         thread.daemon = True
         thread.start()
-    
-    for test, values in settings.description_list.items():
-        test_level = values.get('level', 1)
-        if int(test_level) <= int(max_test_level):
-            queue.put((test, configfile.name))
+        threads.append(thread)
 
-    queue.join()
+    while True:
+        try:
+            if len([t for t in threads if t.isAlive()]) == 0:
+                break
+            time.sleep(1)
+        except KeyboardInterrupt:
+            break
 
     for _, service in service_summary(successful_tests).items():
         logger.info("\n%s: %s" % (service.name, service.release_name))
@@ -122,8 +135,5 @@ Examples:
     if not options.verbose:
         print "Executing tests in background, this might take a while."
 
-    try:
-        main(options.os_username, options.os_password, options.os_auth_url,
+    main(options.os_username, options.os_password, options.os_auth_url,
          options.level, options.verbose, options.os_tenant_name)
-    except KeyboardInterrupt:
-        sys.exit(1)
