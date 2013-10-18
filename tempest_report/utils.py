@@ -172,12 +172,15 @@ def get_smallest_image(images):
     return smallest_image
 
 
-def customized_tempest_conf(user, password, keystone_url, fileobj):
-    keystone_client, keystone_url = get_keystone_client(keystone_url)   
+def customized_tempest_conf(user, password, keystone_url, fileobj, tenant_name=None):
+    keystone_client, keystone_url = get_keystone_client(keystone_url)
     tenants, token = get_tenants(user, password, keystone_url, keystone_client)
     
-    # TODO: really choose first found tenant?
-    tenant_name = tenants[0].name
+    if tenant_name is None:
+        if len(tenants) > 1:
+            print "Found %d tenants, using %s for current job." % (len(tenants), tenants[0].name)
+            print "Please set other tenant on command line if required. "
+        tenant_name = tenants[0].name
 
     services, _scoped_token = get_services(tenant_name, token, keystone_url, keystone_client)
     
