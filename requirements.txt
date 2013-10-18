@@ -2,3 +2,4 @@ python-keystoneclient
 python-glanceclient
 python-novaclient
 tempest
+django-celery
