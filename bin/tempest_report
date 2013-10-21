@@ -83,22 +83,20 @@ def main(user, password, keystone_url, max_test_level=1, verbose=False, tenant_n
         except KeyboardInterrupt:
             break
     
-    failed_tests = [t for t in all_tests if t not in successful_tests]
+    failed_tests = '\n'.join([t for t in all_tests if t not in successful_tests])
     if failed_tests:
-        logger.info("\nFailed tests:")
-        for test in failed_tests:
-            logger.info(test)
+        logger.info("\nFailed tests:\n%s" % failed_tests)
 
     if successful_tests:
-        logger.info("\nSuccessful tests:")
-        for test in successful_tests:
-            logger.info(test)
- 
+        logger.info("\nSuccessful tests:\n%s" % ('\n'.join(successful_tests)))
+
+    summary = "\n"
     for _, service in service_summary(successful_tests).items():
-        logger.info("\n%s: %s" % (service.name, service.release_name))
+        summary += "%s: %s\n" % (service.name, service.release_name)
         for feature in service.features:
-            logger.info("\t\t\t\t%s" % (feature,))
-    
+            summary += "\t\t\t\t%s\n" % (feature,)
+    logger.info(summary)
+
     os.remove(configfile.name)
 
 
