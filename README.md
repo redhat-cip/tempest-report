@@ -36,31 +36,48 @@ Execution
 
     $ tempest_report
 
-    Please set OS_USERNAME, OS_PASSWORD and OS_AUTH_URL. Using local devstack defaults.
+    Failed tests:
+    tempest.api.object_storage.test_object_version
     
-    OK: tempest.api.object_storage.test_object_temp_url
-    OK: tempest.api.object_storage.test_object_expiry
-    OK: tempestwebui/tempest_extensions/test_volume_support.py
-    OK: tempestwebui/tempest_extensions/test_multinic.py
-    OK: tempest.api.object_storage.test_container_sync
-    OK: tempest.api.object_storage.test_object_version
-    OK: tempest.api.object_storage.test_container_quotas
-    OK: tempest.api.object_storage.test_container_staticweb
+    Successful tests:
+    tempest_report.tempest_addons:NovaExtensionTest.test_server_password
+    tempest_report.tempest_addons:GlanceV1Test
+    tempest.api.object_storage.test_object_temp_url:ObjectTempUrlTest.test_get_object_using_temp_url
+    tempest.cli.simple_read_only.test_keystone:SimpleReadOnlyKeystoneClientTest.test_admin_discover
+    tempest.thirdparty.boto.test_s3_buckets
+    tempest_report.tempest_addons:NovaExtensionTest.test_volume_support
+    tempest_report.tempest_addons:GlanceV2Test
+    tempest.api.object_storage.test_container_quotas
+    tempest_report.tempest_addons:NovaExtensionTest.test_user_data
+    tempest.api.object_storage.test_object_expiry
+    tempest.thirdparty.boto.test_ec2_instance_run
+    tempest.api.object_storage.test_container_staticweb
+    tempest_report.tempest_addons:NovaExtensionTest.test_multinic
+    tempest.api.object_storage.test_container_services
+    tempest_report.tempest_addons:NovaExtensionTest.test_extended_status
+    tempest.cli.simple_read_only.test_glance:SimpleReadOnlyGlanceClientTest.test_glance_image_list
+    tempest.api.object_storage.test_container_sync
+    tempest.cli.simple_read_only.test_nova_manage
+    tempest.cli.simple_read_only.test_cinder:SimpleReadOnlyCinderClientTest.test_cinder_volumes_list
+    tempest.api.object_storage.test_container_services:ContainerTest.test_create_container
     
-    Compute (Nova): Essex
-                            Volume Support
-                            Multi-NIC Support
-    
+    Identity Service (Keystone): 
+    Compute (Nova): Grizzly
+    				Server password support
+    				Volume Support
+    				User Data support
+    				EC2 API
+    				Multi-NIC Support
+    				Extended Status support
+    Image Service (Glance): Folsom
+    				V1 Api
+    				V2 Api
     Object Storage (Swift): Grizzly
-                            Temporary object URL
-                            Expiring Objects
-                            Container sync
-                            Object versioning
-                            Container Quota
-                            Static Web
-
-
-Full output can be found in tempest-report-<timestamp>.log
+    				Temporary object URL
+    				S3 API
+    				Container Quota
+    				Static Web
+    Volume Service (Cinder): 
 
 
 Testing
