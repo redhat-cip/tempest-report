@@ -7,6 +7,7 @@ import unittest
 
 import mock
 import keystoneclient
+import glanceclient
 
 from tempest_report import utils, settings
 
@@ -150,20 +151,25 @@ class UtilTest(unittest.TestCase):
 
         images = DummyImages()
         glance.return_value.images = images
+
         retval = utils.get_images("token_id", "http://url:5000/v2")
         self.assertEqual(retval, ['first image'])
 
         glance.assert_called_with(2, "http://url:5000", 
         token="token_id")
-    
-        utils.get_images("token_id", "http://url:35357/v1")
 
-        glance.assert_called_with(1, "http://url:35357",
-        token="token_id")
+        self.raised = False
+        def side_effect(*args, **kwargs):
+            if not self.raised:
+                self.raised = True
+                raise glanceclient.exc.HTTPNotFound()
+            return glance
+ 
+        glance.side_effect = side_effect
+ 
+        utils.get_images("token_id", "http://url:5000/v2")
 
-        utils.get_images("token_id", "http://url/wrong")
-
-        glance.assert_called_with(1, "http://url",
+        glance.assert_called_with(1, "http://url:5000",
         token="token_id")
 
     @mock.patch('novaclient.v1_1.client.Client')
