@@ -39,8 +39,8 @@ def worker(queue, successful_tests, verbose=False):
         queue.task_done()
 
 
-def main(user, password, keystone_url, max_test_level=1, verbose=False, tenant_name=None):
-
+def main(user, password, keystone_url, max_test_level=1, verbose=False,
+         tenant_name=None, max_release_level=sys.maxint):
     now = datetime.datetime.now()
     logfile = "tempest_report-%s.log" % now.strftime("%Y%m%d-%H%M%S")
     print "Full test output logged to %s" % logfile
@@ -63,7 +63,9 @@ def main(user, password, keystone_url, max_test_level=1, verbose=False, tenant_n
     
     for test, values in settings.description_list.items():
         test_level = values.get('level', 1)
-        if int(test_level) <= int(max_test_level):
+        release_level = values.get('release', 0)
+        if (int(test_level) <= int(max_test_level)
+            and int(release_level) <= int(max_release_level)):
             queue.put((test, configfile.name))
             all_tests.append(test)
 
@@ -108,6 +110,7 @@ usage: %%prog [--level <detail level>]
              [--os-password <auth-password>]
              [--os-auth-url <auth-url>]
              [--os-tenant-name <auth-tenant-name>]
+             [--release <release level>]
 
 Command-line interface for OpenStack Tempest.
 
@@ -136,6 +139,9 @@ Examples:
                       default=os.environ.get('OS_TENANT_NAME'),
                       help='Openstack tenant name. '
                            'Defaults to env[OS_TENANT_NAME].')
+    parser.add_option('-r', '--release', default=sys.maxint,
+                      help='Only run tests with a release lower or equal.'
+                           '(Folsom: 6, Grizzly: 7, Havana: 8 and so on)')
  
     (options, args) = parser.parse_args()
     
@@ -147,4 +153,5 @@ Examples:
         print "Executing tests in background, this might take a while."
 
     main(options.os_username, options.os_password, options.os_auth_url,
-         options.level, options.verbose, options.os_tenant_name)
+         options.level, options.verbose, options.os_tenant_name,
+         options.release)
