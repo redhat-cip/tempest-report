@@ -12,7 +12,9 @@ Using a bare Ubuntu Server install you might want to install these packages from
 
     apt-get install python-lxml python-greenlet
 
-This avoids compilation during the next required step.
+This avoids compilation during the next required step. Otherwise you'll need to install the required dev packages: 
+
+    sudo apt-get install libxml2-dev libxslt-dev  
 
 1) Install requirements
 
