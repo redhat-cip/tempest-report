@@ -2,4 +2,3 @@ python-keystoneclient
 python-glanceclient
 python-novaclient
 -e git://github.com/openstack/tempest.git#egg=tempest
-django-celery
