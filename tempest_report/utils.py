@@ -143,14 +143,12 @@ def get_images(token_id, url):
     
     Requires a scoped token_id. """
     
-    try:
-        version = int(url[-1])
-    except ValueError:
-        version = 1
-
     parsed = urlparse.urlparse(url)
     url = "%s://%s" % (parsed.scheme, parsed.netloc)
-    glance = glanceclient.Client(version, url, token=token_id)
+    try:
+        glance = glanceclient.Client(2, url, token=token_id)
+    except glanceclient.exc.HTTPNotFound:
+        glance = glanceclient.Client(1, url, token=token_id)
     return [img for img in glance.images.list()]
 
 
