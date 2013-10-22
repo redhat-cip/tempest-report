@@ -46,7 +46,7 @@ def main(user, password, keystone_url, max_test_level=1, verbose=False, tenant_n
     print "Full test output logged to %s" % logfile
 
     logger = logging.getLogger('tempest_report')
-    logger.setLevel(logging.INFO)
+    logger.setLevel(logging.DEBUG)
     loghandle = logging.FileHandler(logfile)
     loghandle.setLevel(logging.DEBUG)
     logger.addHandler(loghandle)
