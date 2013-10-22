@@ -190,11 +190,11 @@ def customized_tempest_conf(user, password, keystone_url, fileobj, tenant_name=N
     smallest_image = get_smallest_image(images)
     
     write_conf(user, password, keystone_url, tenant_name, 
-        smallest_image.id, smallest_flavor.id, fileobj)
+        smallest_image.id, smallest_flavor.id, fileobj, services)
 
 
 def write_conf(user, password, keystone_url, tenant, 
-        image_id, flavor_id, fileobj):
+        image_id, flavor_id, fileobj, services):
     
     cfg = tempest.config.TempestConfig()
     
@@ -230,5 +230,17 @@ def write_conf(user, password, keystone_url, tenant,
     tempest_config.set('compute', 'flavor_ref', flavor_id)
     tempest_config.set('compute', 'flavor_ref_alt', flavor_id)
     
+    cinder = "True" if services.get('volume') else "False"
+    tempest_config.set('service_available', 'cinder', cinder)
+    
+    glance = "True" if services.get('image') else "False"
+    tempest_config.set('service_available', 'glance', glance)
+ 
+    swift = "True" if services.get('object-store') else "False"
+    tempest_config.set('service_available', 'swift', swift)
+ 
+    nova = "True" if services.get('compute') else "False"
+    tempest_config.set('service_available', 'nova', nova)
+ 
     with fileobj:
         tempest_config.write(fileobj)
