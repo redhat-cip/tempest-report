@@ -125,14 +125,14 @@ class UtilTest(unittest.TestCase):
             assert 'B' in summary
             assert '2' in summary.get('B').features
             release_name = summary.get('B').release_name
-            self.assertEqual(release_name, 'Essex')
+            self.assertEqual(release_name, 'Essex (or later)')
 
     def test_summary_class(self):
         summary = utils.ServiceSummary('servicename')
         self.assertEqual(summary.release_name, '')
         
         summary.set_release(5)
-        self.assertEqual(summary.release_name, 'Essex')
+        self.assertEqual(summary.release_name, 'Essex (or later)')
 
         summary.set_release(999)
         self.assertEqual(summary.release_name, '')
