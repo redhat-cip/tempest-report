@@ -39,12 +39,6 @@ description_list = {
 
 
     # Compute (Nova)   
-    'tempest_report.tempest_addons:NovaExtensionTest.test_volume_support': {'service': 'Compute (Nova)', 'feature': 'Volume Support', },
-    'tempest_report.tempest_addons:NovaExtensionTest.test_multinic': {'service': 'Compute (Nova)', 'feature': 'Multi-NIC Support', 'release': 5, },
-    'tempest_report.tempest_addons:NovaExtensionTest.test_server_password': {'service': 'Compute (Nova)', 'feature': 'Server password support', 'release': 7, }, 
-    'tempest_report.tempest_addons:NovaExtensionTest.test_extended_status': {'service': 'Compute (Nova)', 'feature': 'Extended Status support', 'release': 5, },
-    'tempest_report.tempest_addons:NovaExtensionTest.test_user_data': {'service': 'Compute (Nova)', 'feature': 'User Data support', 'release': 6, },
-
     'tempest.api.compute.flavors.test_flavors': {'service': 'Compute (Nova)', 'level': 2},
     'tempest.api.compute.floating_ips.test_list_floating_ips': {'service': 'Compute (Nova)', 'level': 2},
     'tempest.api.compute.images.test_list_images': {'service': 'Compute (Nova)', 'level': 2},
@@ -177,4 +171,28 @@ description_list = {
     'tempest.thirdparty.boto.test_ec2_security_groups': {'level': 10},
     'tempest.thirdparty.boto.test_s3_objects': {'level': 10},
     'tempest.thirdparty.boto.test_ec2_volumes': {'level': 10},
+
+
+    'tempest_report.tempest_addons:NovaExtensionTest.test_NMN': {'service': 'Compute (Nova)', 'feature': 'Multi-NIC Support', 'release': 5, },
+    'tempest_report.tempest_addons:NovaExtensionTest.test_OS_EXT_STS': {'service': 'Compute (Nova)', 'feature': 'Extended Status support', 'release': 5, },
+    'tempest_report.tempest_addons:NovaExtensionTest.test_user_data': {'service': 'Compute (Nova)', 'feature': 'User Data support', 'release': 6, },
+    'tempest_report.tempest_addons:NovaExtensionTest.test_OS_DCF': {'service': 'Compute (Nova)', 'feature': 'Disk Management Extension', },
+    'tempest_report.tempest_addons:NovaExtensionTest.test_OS_EXT_AZ': {'service': 'Compute (Nova)', 'feature': 'Extended Server Attributes', },
+    'tempest_report.tempest_addons:NovaExtensionTest.test_OS_EXT_SRV_ATTR': {'service': 'Compute (Nova)', 'feature': 'Extended Server Attributes', },
+    'tempest_report.tempest_addons:NovaExtensionTest.test_os_assisted_volume_snapshots': {'service': 'Compute (Nova)', 'feature': 'Assisted volume snapshots', },
+    'tempest_report.tempest_addons:NovaExtensionTest.test_os_create_server_ext': {'service': 'Compute (Nova)', 'feature': 'Extended support to the Create Server v1.1 API', },
+    'tempest_report.tempest_addons:NovaExtensionTest.test_os_deferred_delete': {'service': 'Compute (Nova)', 'feature': 'Instance deferred delete', },
+    'tempest_report.tempest_addons:NovaExtensionTest.test_os_extended_volumes': {'service': 'Compute (Nova)', 'feature': 'Extended Volumes support', },
+    'tempest_report.tempest_addons:NovaExtensionTest.test_os_fixed_ips': {'service': 'Compute (Nova)', 'feature': 'Fixed IPs support', },
+    'tempest_report.tempest_addons:NovaExtensionTest.test_os_flavor_access': {'service': 'Compute (Nova)', 'feature': 'Flavor access support', },
+    'tempest_report.tempest_addons:NovaExtensionTest.test_os_floating_ip_dns': {'service': 'Compute (Nova)', 'feature': 'Floating IP DNS support', },
+    'tempest_report.tempest_addons:NovaExtensionTest.test_os_floating_ip_pools': {'service': 'Compute (Nova)', 'feature': 'Floating IPs support', },
+    'tempest_report.tempest_addons:NovaExtensionTest.test_os_floating_ips': {'service': 'Compute (Nova)', 'feature': 'Floating IPs support', },
+    'tempest_report.tempest_addons:NovaExtensionTest.test_os_rescue': {'service': 'Compute (Nova)', 'feature': 'Instance rescue mode', },
+    'tempest_report.tempest_addons:NovaExtensionTest.test_os_security_groups': {'service': 'Compute (Nova)', 'feature': 'Security group support', },
+    'tempest_report.tempest_addons:NovaExtensionTest.test_os_server_password': {'service': 'Compute (Nova)', 'feature': 'Server password support', 'release': 7},
+    'tempest_report.tempest_addons:NovaExtensionTest.test_os_shelve': {'service': 'Compute (Nova)', 'feature': 'Instance shelve mode', },
+    'tempest_report.tempest_addons:NovaExtensionTest.test_os_user_quotas': {'service': 'Compute (Nova)', 'feature': 'Project user quota support', },
+    'tempest_report.tempest_addons:NovaExtensionTest.test_os_virtual_interfaces': {'service': 'Compute (Nova)', 'feature': 'Virtual interface support', },
+    'tempest_report.tempest_addons:NovaExtensionTest.test_os_volumes': {'service': 'Compute (Nova)', 'feature': 'Volumes support', },
 }
