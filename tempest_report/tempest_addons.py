@@ -14,7 +14,7 @@ class GlanceV2Test(tempest.api.image.base.BaseV2ImageTest):
 
 
 class GlanceV1Test(tempest.api.image.base.BaseV1ImageTest):
-    
+
     def test_list_images(self):
         resp, images_list = self.client.image_list()
         self.assertEqual(resp['status'], '200')
@@ -23,14 +23,14 @@ class GlanceV1Test(tempest.api.image.base.BaseV1ImageTest):
 
 class NovaExtensionTest(tempest.api.compute.base.BaseComputeTest):
     _interface = 'json'
-    
+
     def _get_extensions(self):
         if not hasattr(self, 'extensions'):
             _resp, ext = self.extensions_client.list_extensions()
             self.extensions = []
             for e in ext['extensions']:
                 self.extensions.append(e.get('alias'))
-    
+
     def test_dummy(self):
         self._get_extensions()
 
@@ -127,10 +127,11 @@ class CinderExtensionTest(tempest.cli.ClientTestBase):
     def _get_extensions(self):
         if not hasattr(self, 'extensions'):
             self.extensions = self.cinder('list-extensions')
- 
+
     def test_os_extended_snapshot_attributes(self):
         self._get_extensions()
         self.assertIn("os-extended-snapshot-attributes", self.extensions)
+
     def test_os_admin_actions(self):
         self._get_extensions()
         self.assertIn("os-admin-actions", self.extensions)
@@ -155,7 +156,7 @@ class CinderExtensionTest(tempest.cli.ClientTestBase):
         self._get_extensions()
         self.assertIn("qos-specs", self.extensions)
 
-    def test_os_quota_class_sets (self):
+    def test_os_quota_class_sets(self):
         self._get_extensions()
         self.assertIn("os-quota-class-sets ", self.extensions)
 
@@ -163,7 +164,7 @@ class CinderExtensionTest(tempest.cli.ClientTestBase):
         self._get_extensions()
         self.assertIn("os-quota-sets", self.extensions)
 
-    def test_OS_SCH_HNT  (self):
+    def test_OS_SCH_HNT(self):
         self._get_extensions()
         self.assertIn("OS-SCH-HNT  ", self.extensions)
 

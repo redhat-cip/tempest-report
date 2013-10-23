@@ -24,20 +24,20 @@ def worker(queue, successful_tests, verbose=False):
             testname, configfile_name = queue.get_nowait()
         except Queue.Empty:
             break
-        
+
         success, output = executer(testname, configfile_name)
-        
+
         logger.debug(output)
-        
+
         if success:
             successful_tests.append(testname)
             msg = "OK:  %s" % testname
         else:
             msg = "ERR: %s" % testname
-        
+
         if verbose:
             logger.info(msg)
-        
+
         queue.task_done()
 
 
@@ -61,15 +61,15 @@ def main(options):
                             options.os_tenant_name)
 
     queue = Queue.Queue()
-    successful_tests = [] 
+    successful_tests = []
     all_tests = []
-  
-    if not options.fullrun: 
+
+    if not options.fullrun:
         for test, values in settings.description_list.items():
             test_level = values.get('level', 1)
             release_level = values.get('release', 0)
-            if (int(test_level) <= int(options.level)
-                and int(release_level) <= int(options.max_release_level)):
+            if (int(test_level) <= int(options.level) and
+                    int(release_level) <= int(options.max_release_level)):
                 queue.put((test, configfile.name))
                 all_tests.append(test)
     else:
@@ -82,7 +82,9 @@ def main(options):
     threads = []
     for _nr in range(4):
         thread = threading.Thread(target=worker,
-            args=(queue, successful_tests, options.verbose))
+                                  args=(queue,
+                                        successful_tests,
+                                        options.verbose))
         thread.daemon = True
         thread.start()
         threads.append(thread)
@@ -94,7 +96,7 @@ def main(options):
             time.sleep(1)
         except KeyboardInterrupt:
             break
-    
+
     failed_tests = '\n'.join([t for t in all_tests if t not in successful_tests])
     if failed_tests:
         logger.info("\nFailed tests:\n%s" % failed_tests)
@@ -156,13 +158,13 @@ Examples:
                            '(Folsom: 6, Grizzly: 7, Havana: 8 and so on)')
     parser.add_option("-f", '--full-run', action="store_true", dest="fullrun",
                       default=False, help='Run all tempest tests')
- 
+
     (options, args) = parser.parse_args()
-    
+
     if not (options.os_username and options.os_password and options.os_auth_url):
         parser.print_usage()
         sys.exit(1)
-      
+
     if not options.verbose:
         print "Executing tests in background, this might take a while."
 

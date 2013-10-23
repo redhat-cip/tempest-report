@@ -17,7 +17,7 @@ from tempest_report import settings
 
 class ServiceSummary(object):
     def __init__(self, name, *_args, **_kwargs):
-        self.name = name 
+        self.name = name
         self.release = 0
         self.features = []
         self.release_name = ''
@@ -30,7 +30,7 @@ class ServiceSummary(object):
             self.release = release
             self.release_name = settings.name_mapping.get(
                 release, '')
-    
+
     def add_feature(self, feature):
         if feature and feature not in self.features:
             self.features.append(feature)
@@ -44,10 +44,10 @@ def service_summary(successful_tests):
             service = result.get('service')
             release = result.get('release', 0)
             feature = result.get('feature')
-            
+
             if not service in services:
                 services[service] = ServiceSummary(service)
-            
+
             services[service].set_release(release)
             services[service].add_feature(feature)
 
@@ -55,13 +55,13 @@ def service_summary(successful_tests):
 
 
 def executer(testname, configfile):
-    """ Execute a single test """ 
+    """ Execute a single test """
 
     _environ = dict(os.environ)
 
-    os.environ['TEMPEST_CONFIG_DIR'] = os.path.dirname(configfile) 
-    os.environ['TEMPEST_CONFIG'] = os.path.basename(configfile) 
-   
+    os.environ['TEMPEST_CONFIG_DIR'] = os.path.dirname(configfile)
+    os.environ['TEMPEST_CONFIG'] = os.path.basename(configfile)
+
     success = False
     output = None
 
@@ -81,7 +81,7 @@ def executer(testname, configfile):
 
 
 def get_flavors(user, password, tenant_name, url, version=2):
-    """ Returns list of available flavors """ 
+    """ Returns list of available flavors """
 
     client_class = novaclient.client.get_client_class(version)
     nova_client = client_class(user, password, tenant_name, url)
@@ -114,9 +114,9 @@ def get_keystone_client(keystone_url):
 def get_tenants(user, password, keystone_url, keystone_client):
     """ Authenticate user and return list of tenants """
     keystone = keystone_client(username=user,
-                             password=password,
-                             auth_url=keystone_url)
-    
+                               password=password,
+                               auth_url=keystone_url)
+
     return (keystone.tenants.findall(),
             keystone.auth_ref['token']['id'])
 
@@ -125,8 +125,8 @@ def get_services(tenant_name, token_id, keystone_url, keystone_client):
     """ Returns list of services and a scoped token """
 
     keystone = keystone_client(auth_url=keystone_url,
-                             token=token_id,
-                             tenant_name=tenant_name)
+                               token=token_id,
+                               tenant_name=tenant_name)
 
     # Create a dict of servicetype: endpoints
     services = {}
@@ -139,10 +139,10 @@ def get_services(tenant_name, token_id, keystone_url, keystone_client):
 
 
 def get_images(token_id, url):
-    """ Returns list of available images. 
-    
+    """ Returns list of available images.
+
     Requires a scoped token_id. """
-    
+
     parsed = urlparse.urlparse(url)
     url = "%s://%s" % (parsed.scheme, parsed.netloc)
     try:
@@ -154,26 +154,26 @@ def get_images(token_id, url):
 
 def get_smallest_image(images):
     """ Returns the smallest active image from an image list """
-    
+
     size = None
     smallest_image = None
 
     for img in images:
         if size is None:
             size = img.size
-            smallest_image = img  
-        if (img.size < size and 
+            smallest_image = img
+        if (img.size < size and
             img.disk_format in ['qcow2', 'ami'] and
-            img.status == 'active'):
+                img.status == 'active'):
             size = img.size
-            smallest_image = img  
+            smallest_image = img
     return smallest_image
 
 
 def customized_tempest_conf(user, password, keystone_url, fileobj, tenant_name=None):
     keystone_client, keystone_url = get_keystone_client(keystone_url)
     tenants, token = get_tenants(user, password, keystone_url, keystone_client)
-    
+
     if tenant_name is None:
         if len(tenants) > 1:
             print "Found %d tenants, using %s for current job." % (len(tenants), tenants[0].name)
@@ -181,67 +181,67 @@ def customized_tempest_conf(user, password, keystone_url, fileobj, tenant_name=N
         tenant_name = tenants[0].name
 
     services, _scoped_token = get_services(tenant_name, token, keystone_url, keystone_client)
-    
+
     flavors = get_flavors(user, password, tenant_name, keystone_url)
     smallest_flavor = get_smallest_flavor(flavors)
-    
+
     imageservice_url = services.get('image')
     images = get_images(_scoped_token.get('id'), imageservice_url)
     smallest_image = get_smallest_image(images)
-    
-    write_conf(user, password, keystone_url, tenant_name, 
-        smallest_image.id, smallest_flavor.id, fileobj, services)
+
+    write_conf(user, password, keystone_url, tenant_name,
+               smallest_image.id, smallest_flavor.id, fileobj, services)
 
 
-def write_conf(user, password, keystone_url, tenant, 
-        image_id, flavor_id, fileobj, services):
-    
+def write_conf(user, password, keystone_url, tenant,
+               image_id, flavor_id, fileobj, services):
+
     cfg = tempest.config.TempestConfig()
-    
+
     tempest_config = ConfigParser.SafeConfigParser()
     tempest_config.set('DEFAULT', 'use_stderr', 'False')
     tempest_config.set('DEFAULT', 'log_file', 'tempest.log')
 
-    # Create empty sections 
+    # Create empty sections
     for section, _settings in vars(cfg).items():
         if not tempest_config.has_section(section):
             tempest_config.add_section(section)
 
     # Essential settings
     tempest_config.set('identity', 'uri', keystone_url)
-    
+
     tempest_config.set('identity', 'username', user)
     tempest_config.set('identity', 'alt_username', user)
     tempest_config.set('identity', 'admin_username', user)
-    
+
     tempest_config.set('identity', 'password', password)
     tempest_config.set('identity', 'alt_password', password)
     tempest_config.set('identity', 'admin_password', password)
-    
+
     tempest_config.set('identity', 'tenant_name', tenant)
     tempest_config.set('identity', 'alt_tenant_name', tenant)
     tempest_config.set('identity', 'admin_tenant_name', tenant)
     tempest_config.set('identity', 'admin_role', tenant)
-    
+
     tempest_config.set('object_storage', 'operator_role', tenant)
-    
+
     tempest_config.set('compute', 'image_ref', image_id)
     tempest_config.set('compute', 'image_ref_alt', image_id)
     tempest_config.set('compute', 'allow_tenant_isolation', "False")
     tempest_config.set('compute', 'flavor_ref', flavor_id)
     tempest_config.set('compute', 'flavor_ref_alt', flavor_id)
-    
+
     cinder = "True" if services.get('volume') else "False"
     tempest_config.set('service_available', 'cinder', cinder)
-    
+
     glance = "True" if services.get('image') else "False"
     tempest_config.set('service_available', 'glance', glance)
- 
+
     swift = "True" if services.get('object-store') else "False"
     tempest_config.set('service_available', 'swift', swift)
- 
+
     nova = "True" if services.get('compute') else "False"
     tempest_config.set('service_available', 'nova', nova)
- 
+
     with fileobj:
         tempest_config.write(fileobj)
