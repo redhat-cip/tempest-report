@@ -31,11 +31,6 @@ class NovaExtensionTest(tempest.api.compute.base.BaseComputeTest):
             self.extensions = []
             for e in ext['extensions']:
                 self.extensions.append(e.get('alias'))
-		testname = e['alias'].replace('-', '_')
-		#print '    def test_%s(self):' % testname
-        	#print '        self._get_extensions()'
-        	#print '        self.assertIn("%s", self.extensions)\n' % e['alias']
-		print "tempest_report.tempest_addons:NovaExtensionTest.test_%s': {'service': 'Compute (Nova)', 'feature': '%s', }," % (testname, e['description'])
     
     def test_dummy(self):
         self._get_extensions()
@@ -133,7 +128,6 @@ class CinderExtensionTest(tempest.cli.ClientTestBase):
     def _get_extensions(self):
         if not hasattr(self, 'extensions'):
             self.extensions = self.cinder('list-extensions')
-            print self.extensions
  
     def test_os_extended_snapshot_attributes(self):
         self._get_extensions()
