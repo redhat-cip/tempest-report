@@ -3,7 +3,6 @@
 import tempest.api.image.base
 import tempest.api.compute.base
 import tempest.cli
-from tempest.test import attr
 
 
 class GlanceV2Test(tempest.api.image.base.BaseV2ImageTest):
@@ -132,7 +131,6 @@ class CinderExtensionTest(tempest.cli.ClientTestBase):
     def test_os_extended_snapshot_attributes(self):
         self._get_extensions()
         self.assertIn("os-extended-snapshot-attributes", self.extensions)
-
     def test_os_admin_actions(self):
         self._get_extensions()
         self.assertIn("os-admin-actions", self.extensions)

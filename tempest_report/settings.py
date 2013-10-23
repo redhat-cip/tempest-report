@@ -206,8 +206,6 @@ description_list = {
     'tempest.cli.simple_read_only.test_keystone': {'level': 10},
     'tempest.cli.simple_read_only.test_neutron': {'level': 10},
     'tempest.cli.simple_read_only.test_nova': {'level': 10},
-    'tempest.scenario.test_minimum_basic': {'level': 10},
-    'tempest.scenario.test_network_basic_ops': {'level': 10},
     'tempest.scenario.test_server_basic_ops': {'level': 10},
     'tempest.scenario.test_snapshot_pattern': {'level': 10},
     'tempest.scenario.test_volume_boot_pattern': {'level': 10},

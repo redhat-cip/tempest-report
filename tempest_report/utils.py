@@ -200,15 +200,14 @@ def write_conf(user, password, keystone_url, tenant,
     
     tempest_config = ConfigParser.SafeConfigParser()
     tempest_config.set('DEFAULT', 'use_stderr', 'False')
+    tempest_config.set('DEFAULT', 'log_file', 'tempest.log')
 
     # Create empty sections 
-    for section, settings in vars(cfg).items():
+    for section, _settings in vars(cfg).items():
         if not tempest_config.has_section(section):
             tempest_config.add_section(section)
 
     # Essential settings
-    tempest_config.set('DEFAULT', 'use_stderr', 'False')
-    
     tempest_config.set('identity', 'uri', keystone_url)
     
     tempest_config.set('identity', 'username', user)
@@ -246,23 +245,3 @@ def write_conf(user, password, keystone_url, tenant,
  
     with fileobj:
         tempest_config.write(fileobj)
-
-def get_keystone_client(keystone_url):
-    """ Tries to discover keystone and returns v2 client """
-    root = keystoneclient.generic.client.Client()
-    versions = root.discover(keystone_url)
-    if versions:
-        keystone_url = versions.get('v2.0', {}).get('url')
-        if keystone_url:
-            return (keystoneclient.v2_0.client.Client, keystone_url)
-    raise Exception("Keystone not found.")
-
-
-if __name__ == "__main__":
-    keystone_client, keystone_url = get_keystone_client("http://127.0.0.1:5000")
-    keystone = keystone_client(username=os.environ.get('OS_USERNAME'),
-                             password=os.environ.get('OS_PASSWORD'),
-                             auth_url=keystone_url)
-    
-    print dir(keystone), keystone.version
-
