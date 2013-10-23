@@ -195,4 +195,20 @@ description_list = {
     'tempest_report.tempest_addons:NovaExtensionTest.test_os_user_quotas': {'service': 'Compute (Nova)', 'feature': 'Project user quota support', },
     'tempest_report.tempest_addons:NovaExtensionTest.test_os_virtual_interfaces': {'service': 'Compute (Nova)', 'feature': 'Virtual interface support', },
     'tempest_report.tempest_addons:NovaExtensionTest.test_os_volumes': {'service': 'Compute (Nova)', 'feature': 'Volumes support', },
-}
+
+    'tempest_report.tempest_addons:CinderExtensionTest.test_os_admin_actions': {'service': 'Volume Service (Cinder)', 'feature': 'Enable admin actions', }, 
+    'tempest_report.tempest_addons:CinderExtensionTest.test_os_availability_zone': {'service': 'Volume Service (Cinder)', 'feature': 'Describe Availability Zones', }, 
+    'tempest_report.tempest_addons:CinderExtensionTest.test_backups': {'service': 'Volume Service (Cinder)', 'feature': 'Backups support', }, 
+    'tempest_report.tempest_addons:CinderExtensionTest.test_os_image_create': {'service': 'Volume Service (Cinder)', 'feature': 'Allow creating a volume from an image in the Create Volume v1 API', }, 
+    'tempest_report.tempest_addons:CinderExtensionTest.test_os_extended_snapshot_attributes': {'service': 'Volume Service (Cinder)', 'feature': 'Extended SnapshotAttributes support', }, 
+    'tempest_report.tempest_addons:CinderExtensionTest.test_os_hosts': {'service': 'Volume Service (Cinder)', 'feature': 'Admin-only host administration', }, 
+    'tempest_report.tempest_addons:CinderExtensionTest.test_qos_specs': {'service': 'Volume Service (Cinder)', 'feature': 'QoS specs support', }, 
+    'tempest_report.tempest_addons:CinderExtensionTest.test_os_quota_class_sets': {'service': 'Volume Service (Cinder)', 'feature': 'Quota classes management support', }, 
+    'tempest_report.tempest_addons:CinderExtensionTest.test_os_quota_sets': {'service': 'Volume Service (Cinder)', 'feature': 'Quotas management support', }, 
+    'tempest_report.tempest_addons:CinderExtensionTest.test_OS_SCH_HNT': {'service': 'Volume Service (Cinder)', 'feature': 'Pass arbitrary key/value pairs to the scheduler', }, 
+    'tempest_report.tempest_addons:CinderExtensionTest.test_os_services': {'service': 'Volume Service (Cinder)', 'feature': 'Services support', }, 
+    'tempest_report.tempest_addons:CinderExtensionTest.test_os_snapshot_actions': {'service': 'Volume Service (Cinder)', 'feature': 'Enable snapshot manager actions', }, 
+    'tempest_report.tempest_addons:CinderExtensionTest.test_os_types_extra_specs': {'service': 'Volume Service (Cinder)', 'feature': 'Types extra specs support', }, 
+    'tempest_report.tempest_addons:CinderExtensionTest.test_os_types_manage': {'service': 'Volume Service (Cinder)', 'feature': 'Types manage support', }, 
+
+    }
