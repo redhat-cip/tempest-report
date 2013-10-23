@@ -185,6 +185,18 @@ class CinderExtensionTest(tempest.cli.ClientTestBase):
         self._get_extensions()
         self.assertIn("os-types-manage", self.extensions)
 
+    def test_os_vol_mig_status_attr(self):
+        self._get_extensions()
+        self.assertIn("os-vol-mig-status-attr", self.extensions)
+
+    def test_os_volume_transfer(self):
+        self._get_extensions()
+        self.assertIn("os-volume-transfer", self.extensions)
+
+    def test_os_vol_image_meta(self):
+        self._get_extensions()
+        self.assertIn("os-vol-image-meta", self.extensions)
+
     def test_encryption(self):
         self._get_extensions()
         self.assertIn("encryption", self.extensions)

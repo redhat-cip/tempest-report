@@ -77,6 +77,9 @@ description_list = {
     'tempest_report.tempest_addons:CinderExtensionTest.test_os_snapshot_actions': {'service': 'Volume Service (Cinder)', 'feature': 'Enable snapshot manager actions', }, 
     'tempest_report.tempest_addons:CinderExtensionTest.test_os_types_extra_specs': {'service': 'Volume Service (Cinder)', 'feature': 'Types extra specs support', }, 
     'tempest_report.tempest_addons:CinderExtensionTest.test_os_types_manage': {'service': 'Volume Service (Cinder)', 'feature': 'Types manage support', }, 
+    'tempest_report.tempest_addons:CinderExtensionTest.test_os_vol_image_meta': {'service': 'Volume Service (Cinder)', 'feature': 'Volume image metadata support', }, 
+    'tempest_report.tempest_addons:CinderExtensionTest.test_os_vol_mig_status_attr': {'service': 'Volume Service (Cinder)', 'feature': 'Expose migration status as attribute', }, 
+    'tempest_report.tempest_addons:CinderExtensionTest.test_os_volume_transfer': {'service': 'Volume Service (Cinder)', 'feature': 'Volume transfer management support', }, 
 
     # Level 2: longer running tempests tests
 
