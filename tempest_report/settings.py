@@ -18,14 +18,14 @@ description_list = {
     # 5: ok, but not yet decided
     # 10: tests that failed devstack and need further investigation
 
-    # Minimal tests that don't require an admin account, only for discovering
+    # Level 0: minimal tests that don't require an admin account, only for discovering
     'tempest.cli.simple_read_only.test_keystone:SimpleReadOnlyKeystoneClientTest.test_admin_discover': {'service': 'Identity Service (Keystone)', 'level': 0},
     'tempest.cli.simple_read_only.test_glance:SimpleReadOnlyGlanceClientTest.test_glance_image_list': {'service': 'Image Service (Glance)', 'level': 0},
     'tempest.cli.simple_read_only.test_nova_manage': {'service': 'Compute (Nova)', 'level': 0},
     'tempest.cli.simple_read_only.test_cinder:SimpleReadOnlyCinderClientTest.test_cinder_volumes_list': {'service': 'Volume Service (Cinder)', 'level': 0},
     'tempest.api.object_storage.test_container_services:ContainerTest.test_create_container': {'service': 'Object Storage (Swift)', 'level': 0},
 
-  
+    # Level 1 (default): service/extension discovery, used to make an educated guess about OpenStack release
     # Object Storage (Swift)
     'tempest.api.object_storage.test_container_quotas': {'service': 'Object Storage (Swift)', 'feature': 'Container Quota', 'release': 7, },
     'tempest.api.object_storage.test_object_version': {'service': 'Object Storage (Swift)', 'feature': 'Object versioning', 'release': 6, }, 
@@ -37,8 +37,49 @@ description_list = {
     'tempest.api.object_storage.test_object_expiry': {'service': 'Object Storage (Swift)'},
     'tempest.thirdparty.boto.test_s3_buckets': {'service': 'Object Storage (Swift)', 'feature': 'S3 API' },
 
+    'tempest_report.tempest_addons:GlanceV1Test': {'service': 'Image Service (Glance)', 'feature': 'V1 Api', }, 
+    'tempest_report.tempest_addons:GlanceV2Test': {'service': 'Image Service (Glance)', 'feature': 'V2 Api', 'release': 6 },
+ 
+    'tempest_report.tempest_addons:NovaExtensionTest.test_NMN': {'service': 'Compute (Nova)', 'feature': 'Multi-NIC Support', 'release': 5, },
+    'tempest_report.tempest_addons:NovaExtensionTest.test_OS_EXT_STS': {'service': 'Compute (Nova)', 'feature': 'Extended Status support', 'release': 5, },
+    'tempest_report.tempest_addons:NovaExtensionTest.test_user_data': {'service': 'Compute (Nova)', 'feature': 'User Data support', 'release': 6, },
+    'tempest_report.tempest_addons:NovaExtensionTest.test_OS_DCF': {'service': 'Compute (Nova)', 'feature': 'Disk Management Extension', },
+    'tempest_report.tempest_addons:NovaExtensionTest.test_OS_EXT_AZ': {'service': 'Compute (Nova)', 'feature': 'Extended Server Attributes', },
+    'tempest_report.tempest_addons:NovaExtensionTest.test_OS_EXT_SRV_ATTR': {'service': 'Compute (Nova)', 'feature': 'Extended Server Attributes', },
+    'tempest_report.tempest_addons:NovaExtensionTest.test_os_assisted_volume_snapshots': {'service': 'Compute (Nova)', 'feature': 'Assisted volume snapshots', },
+    'tempest_report.tempest_addons:NovaExtensionTest.test_os_create_server_ext': {'service': 'Compute (Nova)', 'feature': 'Extended support to the Create Server v1.1 API', },
+    'tempest_report.tempest_addons:NovaExtensionTest.test_os_deferred_delete': {'service': 'Compute (Nova)', 'feature': 'Instance deferred delete', },
+    'tempest_report.tempest_addons:NovaExtensionTest.test_os_extended_volumes': {'service': 'Compute (Nova)', 'feature': 'Extended Volumes support', },
+    'tempest_report.tempest_addons:NovaExtensionTest.test_os_fixed_ips': {'service': 'Compute (Nova)', 'feature': 'Fixed IPs support', },
+    'tempest_report.tempest_addons:NovaExtensionTest.test_os_flavor_access': {'service': 'Compute (Nova)', 'feature': 'Flavor access support', },
+    'tempest_report.tempest_addons:NovaExtensionTest.test_os_floating_ip_dns': {'service': 'Compute (Nova)', 'feature': 'Floating IP DNS support', },
+    'tempest_report.tempest_addons:NovaExtensionTest.test_os_floating_ip_pools': {'service': 'Compute (Nova)', 'feature': 'Floating IPs support', },
+    'tempest_report.tempest_addons:NovaExtensionTest.test_os_floating_ips': {'service': 'Compute (Nova)', 'feature': 'Floating IPs support', },
+    'tempest_report.tempest_addons:NovaExtensionTest.test_os_rescue': {'service': 'Compute (Nova)', 'feature': 'Instance rescue mode', },
+    'tempest_report.tempest_addons:NovaExtensionTest.test_os_security_groups': {'service': 'Compute (Nova)', 'feature': 'Security group support', },
+    'tempest_report.tempest_addons:NovaExtensionTest.test_os_server_password': {'service': 'Compute (Nova)', 'feature': 'Server password support', 'release': 7},
+    'tempest_report.tempest_addons:NovaExtensionTest.test_os_shelve': {'service': 'Compute (Nova)', 'feature': 'Instance shelve mode', },
+    'tempest_report.tempest_addons:NovaExtensionTest.test_os_user_quotas': {'service': 'Compute (Nova)', 'feature': 'Project user quota support', },
+    'tempest_report.tempest_addons:NovaExtensionTest.test_os_virtual_interfaces': {'service': 'Compute (Nova)', 'feature': 'Virtual interface support', },
+    'tempest_report.tempest_addons:NovaExtensionTest.test_os_volumes': {'service': 'Compute (Nova)', 'feature': 'Volumes support', },
 
-    # Compute (Nova)   
+    'tempest_report.tempest_addons:CinderExtensionTest.test_os_admin_actions': {'service': 'Volume Service (Cinder)', 'feature': 'Enable admin actions', }, 
+    'tempest_report.tempest_addons:CinderExtensionTest.test_os_availability_zone': {'service': 'Volume Service (Cinder)', 'feature': 'Describe Availability Zones', }, 
+    'tempest_report.tempest_addons:CinderExtensionTest.test_backups': {'service': 'Volume Service (Cinder)', 'feature': 'Backups support', }, 
+    'tempest_report.tempest_addons:CinderExtensionTest.test_os_image_create': {'service': 'Volume Service (Cinder)', 'feature': 'Allow creating a volume from an image in the Create Volume v1 API', }, 
+    'tempest_report.tempest_addons:CinderExtensionTest.test_os_extended_snapshot_attributes': {'service': 'Volume Service (Cinder)', 'feature': 'Extended SnapshotAttributes support', }, 
+    'tempest_report.tempest_addons:CinderExtensionTest.test_os_hosts': {'service': 'Volume Service (Cinder)', 'feature': 'Admin-only host administration', }, 
+    'tempest_report.tempest_addons:CinderExtensionTest.test_qos_specs': {'service': 'Volume Service (Cinder)', 'feature': 'QoS specs support', }, 
+    'tempest_report.tempest_addons:CinderExtensionTest.test_os_quota_class_sets': {'service': 'Volume Service (Cinder)', 'feature': 'Quota classes management support', }, 
+    'tempest_report.tempest_addons:CinderExtensionTest.test_os_quota_sets': {'service': 'Volume Service (Cinder)', 'feature': 'Quotas management support', }, 
+    'tempest_report.tempest_addons:CinderExtensionTest.test_OS_SCH_HNT': {'service': 'Volume Service (Cinder)', 'feature': 'Pass arbitrary key/value pairs to the scheduler', }, 
+    'tempest_report.tempest_addons:CinderExtensionTest.test_os_services': {'service': 'Volume Service (Cinder)', 'feature': 'Services support', }, 
+    'tempest_report.tempest_addons:CinderExtensionTest.test_os_snapshot_actions': {'service': 'Volume Service (Cinder)', 'feature': 'Enable snapshot manager actions', }, 
+    'tempest_report.tempest_addons:CinderExtensionTest.test_os_types_extra_specs': {'service': 'Volume Service (Cinder)', 'feature': 'Types extra specs support', }, 
+    'tempest_report.tempest_addons:CinderExtensionTest.test_os_types_manage': {'service': 'Volume Service (Cinder)', 'feature': 'Types manage support', }, 
+
+    # Level 2: longer running tempests tests
+
     'tempest.api.compute.flavors.test_flavors': {'service': 'Compute (Nova)', 'level': 2},
     'tempest.api.compute.floating_ips.test_list_floating_ips': {'service': 'Compute (Nova)', 'level': 2},
     'tempest.api.compute.images.test_list_images': {'service': 'Compute (Nova)', 'level': 2},
@@ -53,21 +94,19 @@ description_list = {
     'tempest.api.compute.volumes.test_volumes_negative': {'service': 'Compute (Nova)', 'level': 2},
     'tempest.thirdparty.boto.test_ec2_instance_run': {'service': 'Compute (Nova)', 'feature': 'EC2 API', }, 
 
-    # Image (Glance)
     'tempest.api.image.v1.test_images': {'service': 'Image Service (Glance)', 'level': 2},
     'tempest.api.image.v2.test_images': {'service': 'Image Service (Glance)', 'level': 2},
-    'tempest_report.tempest_addons:GlanceV1Test': {'service': 'Image Service (Glance)', 'feature': 'V1 Api', }, 
-    'tempest_report.tempest_addons:GlanceV2Test': {'service': 'Image Service (Glance)', 'feature': 'V2 Api', 'release': 6 },
     'tempest.cli.simple_read_only.test_glance': {'service': 'Image Service (Glance)', 'level': 2},
     'tempest.thirdparty.boto.test_s3_ec2_images': {'service': 'Image Service (Glance)', 'level': 2},
 
-    # Long-running scenario tests
+    # Level 3: long-running scenario tests
     'tempest.scenario.test_dashboard_basic_ops': {'service': 'Scenario', 'level': 3, 'feature': 'Dashboard (Horizon)', }, 
     'tempest.scenario.test_large_ops': {'service': 'Scenario', 'level': 3, 'feature': 'Large Operation Scenario (Nova & Glance)', }, 
     'tempest.scenario.test_server_advanced_ops': {'service': 'Scenario', 'level': 3, 'feature': 'Resize & Suspend (Nova)'},
     'tempest.scenario.test_minimum_basic': {'service': 'Scenario', 'level': 3, 'feature': 'Minimum Scenario (Nova, Glance, Conder)', },
     'tempest.scenario.test_network_basic_ops': {'service': 'Scenario', 'level': 3, 'feature': 'Network (Nova & Neutron)' },
 
+    # Level 5: not yet decided 
     'tempest.scenario.orchestration.test_autoscaling': {'service': 'Scenario', 'level': 5},
     'tempest.scenario.test_network_quotas': {'service': 'Scenario', 'level': 5},
     'tempest.scenario.test_stamp_pattern': {'service': 'Scenario', 'level': 5},
@@ -83,7 +122,7 @@ description_list = {
     'tempest.api.orchestration.stacks.test_stacks': {'level': 5},
     'tempest.api.orchestration.stacks.test_templates': {'level': 5},
     
-    # Tests that failed devstack and need further investigation
+    # Level 10: tests that failed devstack and need further investigation
     # A subset of these tests may still work
     'tempest.api.compute.admin.test_aggregates': {'level': 10},
     'tempest.api.compute.admin.test_availability_zone': {'level': 10},
@@ -171,44 +210,4 @@ description_list = {
     'tempest.thirdparty.boto.test_ec2_security_groups': {'level': 10},
     'tempest.thirdparty.boto.test_s3_objects': {'level': 10},
     'tempest.thirdparty.boto.test_ec2_volumes': {'level': 10},
-
-
-    'tempest_report.tempest_addons:NovaExtensionTest.test_NMN': {'service': 'Compute (Nova)', 'feature': 'Multi-NIC Support', 'release': 5, },
-    'tempest_report.tempest_addons:NovaExtensionTest.test_OS_EXT_STS': {'service': 'Compute (Nova)', 'feature': 'Extended Status support', 'release': 5, },
-    'tempest_report.tempest_addons:NovaExtensionTest.test_user_data': {'service': 'Compute (Nova)', 'feature': 'User Data support', 'release': 6, },
-    'tempest_report.tempest_addons:NovaExtensionTest.test_OS_DCF': {'service': 'Compute (Nova)', 'feature': 'Disk Management Extension', },
-    'tempest_report.tempest_addons:NovaExtensionTest.test_OS_EXT_AZ': {'service': 'Compute (Nova)', 'feature': 'Extended Server Attributes', },
-    'tempest_report.tempest_addons:NovaExtensionTest.test_OS_EXT_SRV_ATTR': {'service': 'Compute (Nova)', 'feature': 'Extended Server Attributes', },
-    'tempest_report.tempest_addons:NovaExtensionTest.test_os_assisted_volume_snapshots': {'service': 'Compute (Nova)', 'feature': 'Assisted volume snapshots', },
-    'tempest_report.tempest_addons:NovaExtensionTest.test_os_create_server_ext': {'service': 'Compute (Nova)', 'feature': 'Extended support to the Create Server v1.1 API', },
-    'tempest_report.tempest_addons:NovaExtensionTest.test_os_deferred_delete': {'service': 'Compute (Nova)', 'feature': 'Instance deferred delete', },
-    'tempest_report.tempest_addons:NovaExtensionTest.test_os_extended_volumes': {'service': 'Compute (Nova)', 'feature': 'Extended Volumes support', },
-    'tempest_report.tempest_addons:NovaExtensionTest.test_os_fixed_ips': {'service': 'Compute (Nova)', 'feature': 'Fixed IPs support', },
-    'tempest_report.tempest_addons:NovaExtensionTest.test_os_flavor_access': {'service': 'Compute (Nova)', 'feature': 'Flavor access support', },
-    'tempest_report.tempest_addons:NovaExtensionTest.test_os_floating_ip_dns': {'service': 'Compute (Nova)', 'feature': 'Floating IP DNS support', },
-    'tempest_report.tempest_addons:NovaExtensionTest.test_os_floating_ip_pools': {'service': 'Compute (Nova)', 'feature': 'Floating IPs support', },
-    'tempest_report.tempest_addons:NovaExtensionTest.test_os_floating_ips': {'service': 'Compute (Nova)', 'feature': 'Floating IPs support', },
-    'tempest_report.tempest_addons:NovaExtensionTest.test_os_rescue': {'service': 'Compute (Nova)', 'feature': 'Instance rescue mode', },
-    'tempest_report.tempest_addons:NovaExtensionTest.test_os_security_groups': {'service': 'Compute (Nova)', 'feature': 'Security group support', },
-    'tempest_report.tempest_addons:NovaExtensionTest.test_os_server_password': {'service': 'Compute (Nova)', 'feature': 'Server password support', 'release': 7},
-    'tempest_report.tempest_addons:NovaExtensionTest.test_os_shelve': {'service': 'Compute (Nova)', 'feature': 'Instance shelve mode', },
-    'tempest_report.tempest_addons:NovaExtensionTest.test_os_user_quotas': {'service': 'Compute (Nova)', 'feature': 'Project user quota support', },
-    'tempest_report.tempest_addons:NovaExtensionTest.test_os_virtual_interfaces': {'service': 'Compute (Nova)', 'feature': 'Virtual interface support', },
-    'tempest_report.tempest_addons:NovaExtensionTest.test_os_volumes': {'service': 'Compute (Nova)', 'feature': 'Volumes support', },
-
-    'tempest_report.tempest_addons:CinderExtensionTest.test_os_admin_actions': {'service': 'Volume Service (Cinder)', 'feature': 'Enable admin actions', }, 
-    'tempest_report.tempest_addons:CinderExtensionTest.test_os_availability_zone': {'service': 'Volume Service (Cinder)', 'feature': 'Describe Availability Zones', }, 
-    'tempest_report.tempest_addons:CinderExtensionTest.test_backups': {'service': 'Volume Service (Cinder)', 'feature': 'Backups support', }, 
-    'tempest_report.tempest_addons:CinderExtensionTest.test_os_image_create': {'service': 'Volume Service (Cinder)', 'feature': 'Allow creating a volume from an image in the Create Volume v1 API', }, 
-    'tempest_report.tempest_addons:CinderExtensionTest.test_os_extended_snapshot_attributes': {'service': 'Volume Service (Cinder)', 'feature': 'Extended SnapshotAttributes support', }, 
-    'tempest_report.tempest_addons:CinderExtensionTest.test_os_hosts': {'service': 'Volume Service (Cinder)', 'feature': 'Admin-only host administration', }, 
-    'tempest_report.tempest_addons:CinderExtensionTest.test_qos_specs': {'service': 'Volume Service (Cinder)', 'feature': 'QoS specs support', }, 
-    'tempest_report.tempest_addons:CinderExtensionTest.test_os_quota_class_sets': {'service': 'Volume Service (Cinder)', 'feature': 'Quota classes management support', }, 
-    'tempest_report.tempest_addons:CinderExtensionTest.test_os_quota_sets': {'service': 'Volume Service (Cinder)', 'feature': 'Quotas management support', }, 
-    'tempest_report.tempest_addons:CinderExtensionTest.test_OS_SCH_HNT': {'service': 'Volume Service (Cinder)', 'feature': 'Pass arbitrary key/value pairs to the scheduler', }, 
-    'tempest_report.tempest_addons:CinderExtensionTest.test_os_services': {'service': 'Volume Service (Cinder)', 'feature': 'Services support', }, 
-    'tempest_report.tempest_addons:CinderExtensionTest.test_os_snapshot_actions': {'service': 'Volume Service (Cinder)', 'feature': 'Enable snapshot manager actions', }, 
-    'tempest_report.tempest_addons:CinderExtensionTest.test_os_types_extra_specs': {'service': 'Volume Service (Cinder)', 'feature': 'Types extra specs support', }, 
-    'tempest_report.tempest_addons:CinderExtensionTest.test_os_types_manage': {'service': 'Volume Service (Cinder)', 'feature': 'Types manage support', }, 
-
-    }
+}
