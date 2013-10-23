@@ -2,11 +2,11 @@
 
 # mapping of tests to openstack versions
 name_mapping = {
-    5: 'Essex',
-    6: 'Folsom',
-    7: 'Grizzly',
-    8: 'Havana',
-    9: 'Icehouse',
+    5: 'Essex (or later)',
+    6: 'Folsom (or later)',
+    7: 'Grizzly (or later)',
+    8: 'Havana (or later)',
+    9: 'Icehouse (or later)',
 }
 
 description_list = {
