@@ -41,8 +41,7 @@ def worker(queue, successful_tests, verbose=False):
         queue.task_done()
 
 
-def main(user, password, keystone_url, max_test_level=1, verbose=False,
-         tenant_name=None, max_release_level=sys.maxint, full_run=False):
+def main(options):
     now = datetime.datetime.now()
     logfile = "tempest_report-%s.log" % now.strftime("%Y%m%d-%H%M%S")
     print "Full test output logged to %s" % logfile
@@ -57,18 +56,20 @@ def main(user, password, keystone_url, max_test_level=1, verbose=False,
     logger.addHandler(console)
 
     configfile = tempfile.NamedTemporaryFile(delete=False)
-    customized_tempest_conf(user, password, keystone_url, configfile, tenant_name)
+    customized_tempest_conf(options.os_username, options.os_password,
+                            options.os_auth_url, configfile,
+                            options.os_tenant_name)
 
     queue = Queue.Queue()
     successful_tests = [] 
     all_tests = []
   
-    if not full_run: 
+    if not options.fullrun: 
         for test, values in settings.description_list.items():
             test_level = values.get('level', 1)
             release_level = values.get('release', 0)
-            if (int(test_level) <= int(max_test_level)
-                and int(release_level) <= int(max_release_level)):
+            if (int(test_level) <= int(options.level)
+                and int(release_level) <= int(options.max_release_level)):
                 queue.put((test, configfile.name))
                 all_tests.append(test)
     else:
@@ -81,7 +82,7 @@ def main(user, password, keystone_url, max_test_level=1, verbose=False,
     threads = []
     for _nr in range(4):
         thread = threading.Thread(target=worker,
-            args=(queue, successful_tests, verbose))
+            args=(queue, successful_tests, options.verbose))
         thread.daemon = True
         thread.start()
         threads.append(thread)
@@ -150,6 +151,7 @@ Examples:
                       help='Openstack tenant name. '
                            'Defaults to env[OS_TENANT_NAME].')
     parser.add_option('-r', '--release', default=sys.maxint,
+                      dest="max_release_level",
                       help='Only run tests with a release lower or equal.'
                            '(Folsom: 6, Grizzly: 7, Havana: 8 and so on)')
     parser.add_option("-f", '--full-run', action="store_true", dest="fullrun",
@@ -164,6 +166,4 @@ Examples:
     if not options.verbose:
         print "Executing tests in background, this might take a while."
 
-    main(options.os_username, options.os_password, options.os_auth_url,
-         options.level, options.verbose, options.os_tenant_name,
-         options.release, options.fullrun)
+    main(options)
