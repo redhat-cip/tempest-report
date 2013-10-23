@@ -102,9 +102,9 @@ def main(options):
     if successful_tests:
         logger.info("\nSuccessful tests:\n%s" % ('\n'.join(successful_tests)))
 
-    summary = "\n"
+    summary = ""
     for _, service in service_summary(successful_tests).items():
-        summary += "%s: %s\n" % (service.name, service.release_name)
+        summary += "\n%s: %s\n" % (service.name, service.release_name)
         for feature in service.features:
             summary += "\t\t\t\t%s\n" % (feature,)
     logger.info(summary)
