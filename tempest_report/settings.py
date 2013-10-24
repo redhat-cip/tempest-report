@@ -95,6 +95,11 @@ description_list = {
     'tempest_report.tempest_addons:NeutronExtensionTest.test_extra_dhcp_opt': {'service': 'Network (Neutron)', 'feature': 'Neutron Extra DHCP opts', 'release': 8}, 
     'tempest_report.tempest_addons:NeutronExtensionTest.test_provider': {'service': 'Network (Neutron)', 'feature': 'Provider Network', 'release': 6}, 
     'tempest_report.tempest_addons:NeutronExtensionTest.test_extraroute': {'service': 'Network (Neutron)', 'feature': 'Neutron Extra Route', 'release': 7},
+    'tempest_report.tempest_addons:CeilometerTest.test_meter_disk': {'service': 'Metering (Ceilometer)', 'feature': 'Disk Usage', 'release': 0},
+    'tempest_report.tempest_addons:CeilometerTest.test_meter_objectstorage': {'service': 'Metering (Ceilometer)', 'feature': 'Object Store Usage', 'release': 0},
+    'tempest_report.tempest_addons:CeilometerTest.test_meter_network': {'service': 'Metering (Ceilometer)', 'feature': 'Network usage', 'release': 0},
+    'tempest_report.tempest_addons:CeilometerTest.test_meter_subnet': {'service': 'Metering (Ceilometer)', 'feature': 'Network usage', 'release': 0},
+    'tempest_report.tempest_addons:CeilometerTest.test_meter_router': {'service': 'Metering (Ceilometer)', 'feature': 'Network usage', 'release': 0},
 
     # Level 2: longer running tempests tests
 

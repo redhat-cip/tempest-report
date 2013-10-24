@@ -1,5 +1,6 @@
 # Copyright (C) 2013 eNovance SAS <licensing@enovance.com>
 
+import ceilometerclient.client
 import tempest.api.image.base
 import tempest.api.compute.base
 import tempest.cli
@@ -261,3 +262,37 @@ class NeutronExtensionTest(tempest.cli.ClientTestBase):
     def test_extraroute(self):
         self._get_extensions()
         self.assertIn("extraroute", self.extensions)
+
+
+class CeilometerTest(tempest.cli.ClientTestBase):
+    def _get_meters(self):
+        if not hasattr(self, 'meters'):
+            ceilo = ceilometerclient.client.get_client(1, **({
+                'os_username': self.config.identity.username,
+                'os_password': self.config.identity.password,
+                'os_auth_url': self.config.identity.uri,
+                'os_tenant_name': self.config.identity.tenant_name,
+                }))
+            self.meters = []
+            for meter in ceilo.meters.list():
+                self.meters.append(meter.name)
+
+    def test_meter_disk(self):
+        self._get_meters()
+        self.assertIn("storage.api.request", self.meters)
+
+    def test_meter_objectstorage(self):
+        self._get_meters()
+        self.assertIn("storage.objects", self.meters)
+
+    def test_meter_network(self):
+        self._get_meters()
+        self.assertIn("network", self.meters)
+
+    def test_meter_subnet(self):
+        self._get_meters()
+        self.assertIn("subnet", self.meters)
+
+    def test_meter_router(self):
+        self._get_meters()
+        self.assertIn("router", self.meters)
