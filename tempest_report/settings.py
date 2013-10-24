@@ -86,7 +86,7 @@ description_list = {
     'tempest_report.tempest_addons:NeutronExtensionTest.test_ext_gw_mode': {'service': 'Network (Neutron)', 'feature': 'Neutron L3 Configurable external gateway mode', 'release': 8}, 
     'tempest_report.tempest_addons:NeutronExtensionTest.test_binding': {'service': 'Network (Neutron)', 'feature': 'Port Binding', 'release': 7}, 
     'tempest_report.tempest_addons:NeutronExtensionTest.test_quotas': {'service': 'Network (Neutron)', 'feature': 'Quota management support', 'release': 6}, 
-    'tempest_report.tempest_addons:NeutronExtensionTest.test_agent': {'service': 'Network (Neutron)', 'feature': 'agent', }, 
+    'tempest_report.tempest_addons:NeutronExtensionTest.test_agent': {'service': 'Network (Neutron)', 'feature': 'Agent management extension', }, 
     'tempest_report.tempest_addons:NeutronExtensionTest.test_dhcp_agent_scheduler': {'service': 'Network (Neutron)', 'feature': 'DHCP Agent Scheduler', 'release': 8}, 
     'tempest_report.tempest_addons:NeutronExtensionTest.test_multi_provider': {'service': 'Network (Neutron)', 'feature': 'Multi Provider Network', 'release': 6}, 
     'tempest_report.tempest_addons:NeutronExtensionTest.test_external_net': {'service': 'Network (Neutron)', 'feature': 'Neutron external network', 'release': 8}, 
