@@ -43,7 +43,7 @@ def worker(queue, successful_tests, verbose=False):
 
 def main(options):
     now = datetime.datetime.now()
-    logfile = "tempest_report-%s.log" % now.strftime("%Y%m%d-%H%M%S")
+    logfile = "tempest-report-%s.log" % now.strftime("%Y%m%d-%H%M%S")
     print "Full test output logged to %s" % logfile
 
     logger = logging.getLogger('tempest_report')
