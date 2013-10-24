@@ -231,17 +231,16 @@ def write_conf(user, password, keystone_url, tenant,
     tempest_config.set('compute', 'flavor_ref', flavor_id)
     tempest_config.set('compute', 'flavor_ref_alt', flavor_id)
 
-    cinder = "True" if services.get('volume') else "False"
-    tempest_config.set('service_available', 'cinder', cinder)
+    run_services = [('volume', 'cinder'),
+                ('image','glance'),
+                ('object-store','swift'),
+                ('compute','nova'),
+                ('network','neutron'),
+                ]
 
-    glance = "True" if services.get('image') else "False"
-    tempest_config.set('service_available', 'glance', glance)
-
-    swift = "True" if services.get('object-store') else "False"
-    tempest_config.set('service_available', 'swift', swift)
-
-    nova = "True" if services.get('compute') else "False"
-    tempest_config.set('service_available', 'nova', nova)
+    for service, name in run_services:
+        run = "True" if services.get(service) else "False"
+        tempest_config.set('service_available', name, run)
 
     with fileobj:
         tempest_config.write(fileobj)
