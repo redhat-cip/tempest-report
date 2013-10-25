@@ -9,7 +9,7 @@ Installation
 
 Using a fresh Ubuntu Server (12.0.4 LTS) installation you need to install these packages:
 
-    sudo apt-get install python-pip git libxml2-dev libxslt-dev python-dev
+    sudo apt-get install python-pip git python-greenlet python-openssl python-crypto python-lxml
 
 2) Clone repository
 

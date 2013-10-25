@@ -21,7 +21,7 @@ description_list = {
     # Level 0: minimal tests that don't require an admin account, only for discovering
     'tempest.cli.simple_read_only.test_keystone:SimpleReadOnlyKeystoneClientTest.test_admin_discover': {'service': 'Identity Service (Keystone)', 'level': 0},
     'tempest.cli.simple_read_only.test_glance:SimpleReadOnlyGlanceClientTest.test_glance_image_list': {'service': 'Image Service (Glance)', 'level': 0},
-    'tempest.cli.simple_read_only.test_nova_manage': {'service': 'Compute (Nova)', 'level': 0},
+    'tempest.cli.simple_read_only.test_nova:SimpleReadOnlyNovaClientTest.test_admin_flavor_list': {'service': 'Compute (Nova)', 'level': 0},
     'tempest.cli.simple_read_only.test_cinder:SimpleReadOnlyCinderClientTest.test_cinder_volumes_list': {'service': 'Volume Service (Cinder)', 'level': 0},
     'tempest.api.object_storage.test_container_services:ContainerTest.test_create_container': {'service': 'Object Storage (Swift)', 'level': 0},
 
