@@ -22,7 +22,7 @@ class GlanceV1Test(tempest.api.image.base.BaseV1ImageTest):
         self.assertTrue(len(images_list) > 0)
 
 
-class NovaExtensionTest(tempest.api.compute.base.BaseComputeTest):
+class NovaExtensionTest(tempest.api.compute.base.BaseV2ComputeTest):
     _interface = 'json'
 
     def _get_extensions(self):
