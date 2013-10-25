@@ -2,6 +2,7 @@
 
 #pylint: disable=E1101, E1103
 
+from Queue import Empty as QueueEmpty
 import subprocess
 import unittest
 
@@ -304,3 +305,27 @@ class UtilTest(unittest.TestCase):
         self.assertIn("alt_tenant_name = tenant", fileobj.content)
         self.assertIn("admin_tenant_name = tenant", fileobj.content)
         self.assertIn("admin_role = tenant", fileobj.content)
+
+    @mock.patch('logging.getLogger')
+    @mock.patch('Queue.Queue')
+    @mock.patch('tempest_report.utils.executer')
+    def test_worker(self, executer, queue, logger):
+       
+        # Run once in test, than return Exception
+        self.executed = False
+        def side_effect(*args, **kwargs):
+            if not self.executed:
+                self.executed = True
+                return ("testname", "confname")
+            raise QueueEmpty()
+
+        successful_tests = []
+        tempest_report.utils.executer.return_value = (True, "")
+        queue.get_nowait.side_effect = side_effect 
+        utils.worker(queue, successful_tests)
+
+        queue.get_nowait.assert_called_with()
+        logger.assert_called_with('tempest_report')
+        executer.assert_called_with('testname', "confname")
+        self.assertEqual(successful_tests, ["testname"])
+        queue.task_done.assert_called_with()

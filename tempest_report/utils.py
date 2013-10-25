@@ -2,7 +2,9 @@
 #pylint:disable=E1101
 
 import ConfigParser
+import logging
 import os
+import Queue
 import subprocess
 import urlparse
 
@@ -244,3 +246,27 @@ def write_conf(user, password, keystone_url, tenant,
 
     with fileobj:
         tempest_config.write(fileobj)
+
+
+def worker(queue, successful_tests, verbose=False):
+    logger = logging.getLogger('tempest_report')
+    while True:
+        try:
+            testname, configfile_name = queue.get_nowait()
+        except Queue.Empty:
+            break
+
+        success, output = executer(testname, configfile_name)
+
+        logger.debug(output)
+
+        if success:
+            successful_tests.append(testname)
+            msg = "OK:  %s" % testname
+        else:
+            msg = "ERR: %s" % testname
+
+        if verbose:
+            logger.info(msg)
+
+        queue.task_done()
