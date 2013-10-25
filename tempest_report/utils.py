@@ -286,12 +286,16 @@ def main(options):
 
     logger = logging.getLogger('tempest_report')
     logger.setLevel(logging.DEBUG)
-    loghandle = logging.FileHandler(logfile)
-    loghandle.setLevel(logging.DEBUG)
-    logger.addHandler(loghandle)
+    logger.propagate = False
+    
+    logfile = logging.FileHandler(logfile)
+    logfile.setLevel(logging.DEBUG)
+    
     console = logging.StreamHandler()
     console.setLevel(logging.INFO)
+    
     logger.addHandler(console)
+    logger.addHandler(logfile)
 
     configfile = tempfile.NamedTemporaryFile(delete=False)
     customized_tempest_conf(options.os_username, options.os_password,
