@@ -5,30 +5,30 @@ tempest-report is a tool for OpenStack Tempest to test remote installations and 
 Installation
 ------------
 
-0) *Optional*: install some requirements from your distribution
-
-It might be a good idea to install some libraries from your distribution repository.
-Using a bare Ubuntu Server install you might want to install these packages from OS repos:
-
-    apt-get install python-lxml python-greenlet
-
-This avoids compilation during the next required step. Otherwise you'll need to install the required dev packages: 
-
-    sudo apt-get install libxml2-dev libxslt-dev  
-
 1) Install requirements
 
-    pip install -r requirements.txt
+Using a fresh Ubuntu Server (12.0.4 LTS) installation you need to install these packages:
 
-2) Install tempest_report
+    sudo apt-get install python-pip git libxml2-dev libxslt-dev python-dev
 
-    python setup.py install
+2) Clone repository
+
+    git clone git@github.com:enovance/tempest-report.git
+    cd tempest-report
+
+3) Install requirements
+
+    sudo pip install -r requirements.txt
+
+4) Install tempest_report
+
+    sudo python setup.py install
 
 
-Execution
+Usage
 ---------
 
-1) Set environment variables (you can also use the command line switches, but this will show up in your shell history):
+1) Create a file "tempest.env" with these environment variables (you can also use the command line switches, but this will show up in your shell history):
 
     export OS_USERNAME=demo
     export OS_PASSWORD=devstack
@@ -36,6 +36,7 @@ Execution
 
 2) Run basic tests:
 
+    $ source tempest.env
     $ tempest_report
 
     Failed tests:
