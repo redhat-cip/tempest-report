@@ -10,6 +10,7 @@ import keystoneclient
 import glanceclient
 
 from tempest_report import utils, settings
+import tempest_report
 
 
 class DummyFileObject(object):
@@ -211,6 +212,49 @@ class UtilTest(unittest.TestCase):
         smallest_image = utils.get_smallest_image(images)
         self.assertEqual(smallest_image.size, 2)
    
-    # TODO
-    def test_customized_tempest_conf(self):
-    	pass    
+    @mock.patch('tempest_report.utils.get_keystone_client')
+    @mock.patch('tempest_report.utils.get_tenants')
+    @mock.patch('tempest_report.utils.get_services')
+    @mock.patch('tempest_report.utils.get_flavors')
+    @mock.patch('tempest_report.utils.get_images')
+    @mock.patch('tempest_report.utils.write_conf')
+    def test_customized_tempest_conf(self,
+        get_keystone_client, get_tenants, get_services,
+        get_flavors, get_images, write_conf):
+        
+        tempest_report.utils.get_keystone_client.return_value = (
+            None, 'keystone_url')
+        
+        class ObjDummy(object):
+            pass
+        
+        tenant = ObjDummy()
+        tenant.name = "tenant_name"
+        tempest_report.utils.get_tenants.return_value = (
+            [tenant], None)
+       
+        image = ObjDummy()
+        image.size = 1
+        image.id = 23
+        tempest_report.utils.get_images.return_value = (
+            [image])
+
+        flavor = ObjDummy()
+        flavor.vcpus = 1
+        flavor.disk = 1
+        flavor.ram = 1
+        flavor.id = 42
+        tempest_report.utils.get_flavors.return_value = (
+            [flavor])
+
+        tempest_report.utils.get_services.return_value = (
+            {'image': 'url'}, {'id': 'id'})
+
+        fileobj = mock.Mock()
+        utils.customized_tempest_conf("user", "password",
+            "http://keystone_url", fileobj)
+
+        tempest_report.utils.write_conf.assert_called_with(
+            'user', 'password', 'keystone_url', 
+            'tenant_name', 23, 42, fileobj, 
+            {'image': 'url'})
