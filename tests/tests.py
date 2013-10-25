@@ -329,3 +329,31 @@ class UtilTest(unittest.TestCase):
         executer.assert_called_with('testname', "confname")
         self.assertEqual(successful_tests, ["testname"])
         queue.task_done.assert_called_with()
+
+    @mock.patch('os.remove')
+    @mock.patch('tempest_report.utils.customized_tempest_conf')
+    @mock.patch('threading.Thread')
+    @mock.patch('tempest_report.utils.logging')
+    def test_main(self, logger, thread, customized_conf, remove):
+        
+        options = lambda: object
+        options.os_username = "username"
+        options.os_password = "password"
+        options.os_auth_url = "auth_url"
+        options.os_tenant_name = "tenant_name"
+        options.fullrun = False 
+        options.level = 1
+        options.max_release_level = 10
+        options.verbose = False
+
+        thread.return_value.isAlive = lambda: False
+        
+        with mock.patch(
+            'tempest_report.settings.description_list',
+            {'testname': {}}):
+            utils.main(options)
+        
+        logger.getLogger().info.assert_any_call(
+            '\nFailed tests:\ntestname')
+        
+        self.assertTrue(remove.called)
