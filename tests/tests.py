@@ -16,7 +16,7 @@ import tempest_report
 class DummyFileObject(object):
     def __init__(self, *_args, **_kwargs):
         self.name = '/dir/dummy'
-        self.content = None
+        self.content = ""
 
     def __exit__(self, *_args, **_kwargs):
         pass
@@ -25,7 +25,7 @@ class DummyFileObject(object):
         pass
 
     def write(self, content, *_args, **_kwargs):
-        self.content = content
+        self.content += content
 
 
 class Tenant(object):
@@ -258,3 +258,49 @@ class UtilTest(unittest.TestCase):
             'user', 'password', 'keystone_url', 
             'tenant_name', 23, 42, fileobj, 
             {'image': 'url'})
+
+    def test_write_conf(self):
+
+        fileobj = DummyFileObject()
+        utils.write_conf("user", "password", "keystone_url", "tenant",
+                         "image_id", "flavor_id", fileobj, {'compute': 'url'})
+        
+        self.assertIn("[DEFAULT]", fileobj.content)
+        self.assertIn("use_stderr = False", fileobj.content)
+        self.assertIn("log_file = tempest.log", fileobj.content)
+        self.assertIn("[stress]", fileobj.content)
+        self.assertIn("[compute]", fileobj.content)
+        self.assertIn("image_ref = image_id", fileobj.content)
+        self.assertIn("image_ref_alt = image_id", fileobj.content)
+        self.assertIn("allow_tenant_isolation = False", fileobj.content)
+        self.assertIn("flavor_ref = flavor_id", fileobj.content)
+        self.assertIn("flavor_ref_alt = flavor_id", fileobj.content)
+        self.assertIn("[network]", fileobj.content)
+        self.assertIn("[boto]", fileobj.content)
+        self.assertIn("[scenario]", fileobj.content)
+        self.assertIn("[object_storage]", fileobj.content)
+        self.assertIn("operator_role = tenant", fileobj.content)
+        self.assertIn("[volume]", fileobj.content)
+        self.assertIn("[debug]", fileobj.content)
+        self.assertIn("[dashboard]", fileobj.content)
+        self.assertIn("[orchestration]", fileobj.content)
+        self.assertIn("[compute_admin]", fileobj.content)
+        self.assertIn("[images]", fileobj.content)
+        self.assertIn("[service_available]", fileobj.content)
+        self.assertIn("cinder = False", fileobj.content)
+        self.assertIn("glance = False", fileobj.content)
+        self.assertIn("swift = False", fileobj.content)
+        self.assertIn("nova = True", fileobj.content)
+        self.assertIn("neutron = False", fileobj.content)
+        self.assertIn("[identity]", fileobj.content)
+        self.assertIn("uri = keystone_url", fileobj.content)
+        self.assertIn("username = user", fileobj.content)
+        self.assertIn("alt_username = user", fileobj.content)
+        self.assertIn("admin_username = user", fileobj.content)
+        self.assertIn("password = password", fileobj.content)
+        self.assertIn("alt_password = password", fileobj.content)
+        self.assertIn("admin_password = password", fileobj.content)
+        self.assertIn("tenant_name = tenant", fileobj.content)
+        self.assertIn("alt_tenant_name = tenant", fileobj.content)
+        self.assertIn("admin_tenant_name = tenant", fileobj.content)
+        self.assertIn("admin_role = tenant", fileobj.content)
