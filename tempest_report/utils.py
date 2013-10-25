@@ -2,11 +2,18 @@
 #pylint:disable=E1101
 
 import ConfigParser
+import datetime
 import logging
 import os
+import pkgutil
 import Queue
 import subprocess
+import tempest
+import tempfile
+import threading
+import time
 import urlparse
+
 
 import keystoneclient.generic.client
 import keystoneclient.v2_0
@@ -270,3 +277,78 @@ def worker(queue, successful_tests, verbose=False):
             logger.info(msg)
 
         queue.task_done()
+
+
+def main(options):
+    now = datetime.datetime.now()
+    logfile = "tempest-report-%s.log" % now.strftime("%Y%m%d-%H%M%S")
+    print "Full test output logged to %s" % logfile
+
+    logger = logging.getLogger('tempest_report')
+    logger.setLevel(logging.DEBUG)
+    loghandle = logging.FileHandler(logfile)
+    loghandle.setLevel(logging.DEBUG)
+    logger.addHandler(loghandle)
+    console = logging.StreamHandler()
+    console.setLevel(logging.INFO)
+    logger.addHandler(console)
+
+    configfile = tempfile.NamedTemporaryFile(delete=False)
+    customized_tempest_conf(options.os_username, options.os_password,
+                            options.os_auth_url, configfile,
+                            options.os_tenant_name)
+
+    queue = Queue.Queue()
+    successful_tests = []
+    all_tests = []
+
+    if not options.fullrun:
+        for test, values in settings.description_list.items():
+            test_level = values.get('level', 1)
+            release_level = values.get('release', 0)
+            if (int(test_level) <= int(options.level) and
+                    int(release_level) <= int(options.max_release_level)):
+                queue.put((test, configfile.name))
+                all_tests.append(test)
+    else:
+        packages = pkgutil.walk_packages(tempest.__path__, prefix="tempest.")
+        for _importer, testname, _ispkg in packages:
+            if "test_" in testname:
+                queue.put((testname, configfile.name))
+                all_tests.append(testname)
+
+    threads = []
+    for _nr in range(4):
+        thread = threading.Thread(target=worker,
+                                  args=(queue,
+                                        successful_tests,
+                                        options.verbose))
+        thread.daemon = True
+        thread.start()
+        threads.append(thread)
+
+    while True:
+        try:
+            if len([t for t in threads if t.isAlive()]) == 0:
+                break
+            time.sleep(1)
+        except KeyboardInterrupt:
+            break
+
+    failed_tests = '\n'.join([t for t in all_tests if t not in successful_tests])
+    if failed_tests:
+        logger.info("\nFailed tests:\n%s" % failed_tests)
+
+    if successful_tests:
+        logger.info("\nSuccessful tests:\n%s" % ('\n'.join(successful_tests)))
+
+    summary = ""
+    for _, service in service_summary(successful_tests).items():
+        summary += "\n%s: %s\n" % (service.name, service.release_name)
+        for feature in service.features:
+            summary += "\t\t\t\t%s\n" % (feature,)
+    logger.info(summary)
+
+    os.remove(configfile.name)
+
+
