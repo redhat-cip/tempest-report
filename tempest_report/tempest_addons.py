@@ -1,5 +1,7 @@
 # Copyright (C) 2013 eNovance SAS <licensing@enovance.com>
 
+import re
+
 import ceilometerclient.client
 import tempest.api.image.base
 import tempest.api.compute.base
@@ -33,81 +35,12 @@ class NovaExtensionTest(tempest.api.compute.base.BaseV2ComputeTest):
 
 
 class CinderExtensionTest(tempest.cli.ClientTestBase):
-    def _get_extensions(self):
-        if not hasattr(self, 'extensions'):
-            self.extensions = self.cinder('list-extensions')
-
-    def test_os_extended_snapshot_attributes(self):
-        self._get_extensions()
-        self.assertIn("os-extended-snapshot-attributes", self.extensions)
-
-    def test_os_admin_actions(self):
-        self._get_extensions()
-        self.assertIn("os-admin-actions", self.extensions)
-
-    def test_os_availability_zone(self):
-        self._get_extensions()
-        self.assertIn("os-availability-zone", self.extensions)
-
-    def test_backups(self):
-        self._get_extensions()
-        self.assertIn("backups", self.extensions)
-
-    def test_os_image_create(self):
-        self._get_extensions()
-        self.assertIn("os-image-create", self.extensions)
-
-    def test_os_hosts(self):
-        self._get_extensions()
-        self.assertIn("os-hosts", self.extensions)
-
-    def test_qos_specs(self):
-        self._get_extensions()
-        self.assertIn("qos-specs", self.extensions)
-
-    def test_os_quota_class_sets(self):
-        self._get_extensions()
-        self.assertIn("os-quota-class-sets ", self.extensions)
-
-    def test_os_quota_sets(self):
-        self._get_extensions()
-        self.assertIn("os-quota-sets", self.extensions)
-
-    def test_OS_SCH_HNT(self):
-        self._get_extensions()
-        self.assertIn("OS-SCH-HNT  ", self.extensions)
-
-    def test_os_services(self):
-        self._get_extensions()
-        self.assertIn("os-services", self.extensions)
-
-    def test_os_snapshot_actions(self):
-        self._get_extensions()
-        self.assertIn("os-snapshot-actions", self.extensions)
-
-    def test_os_types_extra_specs(self):
-        self._get_extensions()
-        self.assertIn("os-types-extra-specs", self.extensions)
-
-    def test_os_types_manage(self):
-        self._get_extensions()
-        self.assertIn("os-types-manage", self.extensions)
-
-    def test_os_vol_mig_status_attr(self):
-        self._get_extensions()
-        self.assertIn("os-vol-mig-status-attr", self.extensions)
-
-    def test_os_volume_transfer(self):
-        self._get_extensions()
-        self.assertIn("os-volume-transfer", self.extensions)
-
-    def test_os_vol_image_meta(self):
-        self._get_extensions()
-        self.assertIn("os-vol-image-meta", self.extensions)
-
-    def test_encryption(self):
-        self._get_extensions()
-        self.assertIn("encryption", self.extensions)
+    def test_extensions(self):
+        m = re.compile('\|.*\|.*\|\s+([A-Za-z-]*)\s+\|.*\|')
+        for line in self.cinder('list-extensions').split('\n'):
+            res = m.search(line)
+            if res:
+                print "cinder-extension-%s ... ok" % res.group(1)
 
 
 class NeutronExtensionTest(tempest.cli.ClientTestBase):
