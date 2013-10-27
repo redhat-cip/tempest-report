@@ -28,6 +28,7 @@ description_list = {
     'tempest_report.tempest_addons:NovaExtensionTest': {'service': 'Compute (Nova)', 'level': 0},
     'tempest_report.tempest_addons:CinderExtensionTest': {'service': 'Volume Service (Cinder)', 'level': 0},
     'tempest_report.tempest_addons:NeutronExtensionTest': {'service': 'Network (Neutron)', 'level': 0},
+    'tempest_report.tempest_addons:CeilometerTest': {'service': 'Metering (Ceilometer)', 'level': 0},
     
     # Level 1 (default): service/extension discovery, used to make an educated guess about OpenStack release
     # Object Storage (Swift)
@@ -102,11 +103,12 @@ description_list = {
     'neutron-extension-extra-dhcp-opt': {'service': 'Network (Neutron)', 'feature': 'Neutron Extra DHCP opts', 'release': 8, 'dummy': True}, 
     'neutron-extension-provider': {'service': 'Network (Neutron)', 'feature': 'Provider Network', 'release': 6, 'dummy': True}, 
     'neutron-extension-extraroute': {'service': 'Network (Neutron)', 'feature': 'Neutron Extra Route', 'release': 7, 'dummy': True},
-    'tempest_report.tempest_addons:CeilometerTest.test_meter_disk': {'service': 'Metering (Ceilometer)', 'feature': 'Disk Usage', 'release': 0},
-    'tempest_report.tempest_addons:CeilometerTest.test_meter_objectstorage': {'service': 'Metering (Ceilometer)', 'feature': 'Object Store Usage', 'release': 0},
-    'tempest_report.tempest_addons:CeilometerTest.test_meter_network': {'service': 'Metering (Ceilometer)', 'feature': 'Network usage', 'release': 0},
-    'tempest_report.tempest_addons:CeilometerTest.test_meter_subnet': {'service': 'Metering (Ceilometer)', 'feature': 'Network usage', 'release': 0},
-    'tempest_report.tempest_addons:CeilometerTest.test_meter_router': {'service': 'Metering (Ceilometer)', 'feature': 'Network usage', 'release': 0},
+
+    'ceilometer-meter-storage.api.request': {'service': 'Metering (Ceilometer)', 'feature': 'Disk Usage', 'release': 0, 'dummy': True},
+    'ceilometer-meter-storage.objects': {'service': 'Metering (Ceilometer)', 'feature': 'Object Store Usage', 'release': 0, 'dummy': True},
+    'ceilometer-meter-network': {'service': 'Metering (Ceilometer)', 'feature': 'Network usage', 'release': 0, 'dummy': True},
+    'ceilometer-meter-subnet': {'service': 'Metering (Ceilometer)', 'feature': 'Network usage', 'release': 0, 'dummy': True},
+    'ceilometer-meter-router': {'service': 'Metering (Ceilometer)', 'feature': 'Network usage', 'release': 0, 'dummy': True},
 
     # Level 2: longer running tempests tests
 
