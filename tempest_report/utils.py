@@ -7,6 +7,7 @@ import logging
 import os
 import pkgutil
 import Queue
+import re
 import subprocess
 import tempest
 import tempfile
@@ -76,7 +77,7 @@ def executer(testname, configfile):
 
     try:
         output = subprocess.check_output(
-            ["nosetests", "-v", testname],
+            ["nosetests", "-v", "-s", testname],
             stderr=subprocess.STDOUT)
         success = True
         output = output
@@ -255,7 +256,7 @@ def write_conf(user, password, keystone_url, tenant,
         tempest_config.write(fileobj)
 
 
-def worker(queue, successful_tests, verbose=False):
+def worker(queue, successful_tests, successful_subtests, verbose=False):
     logger = logging.getLogger('tempest_report')
     while True:
         try:
@@ -272,6 +273,12 @@ def worker(queue, successful_tests, verbose=False):
             msg = "OK:  %s" % testname
         else:
             msg = "ERR: %s" % testname
+
+        lineend_ok = re.compile('(.*) \.\.\. ok$')
+        for line in output.split('\n'):
+            match = lineend_ok.match(line)
+            if match and match not in successful_tests:
+                successful_subtests.append(match.group(1))
 
         if verbose:
             logger.info(msg)
@@ -304,6 +311,7 @@ def main(options):
 
     queue = Queue.Queue()
     successful_tests = []
+    successful_subtests = []
     all_tests = []
 
     if not options.fullrun:
@@ -326,6 +334,7 @@ def main(options):
         thread = threading.Thread(target=worker,
                                   args=(queue,
                                         successful_tests,
+                                        successful_subtests,
                                         options.verbose))
         thread.daemon = True
         thread.start()
@@ -347,7 +356,8 @@ def main(options):
         logger.info("\nSuccessful tests:\n%s" % ('\n'.join(successful_tests)))
 
     summary = ""
-    for _, service in service_summary(successful_tests).items():
+    passed_tests = successful_tests + successful_subtests
+    for _, service in service_summary(passed_tests).items():
         summary += "\n%s: %s\n" % (service.name, service.release_name)
         for feature in service.features:
             summary += "\t\t\t\t%s\n" % (feature,)

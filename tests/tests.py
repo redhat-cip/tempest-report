@@ -96,7 +96,7 @@ class UtilTest(unittest.TestCase):
         self.assertEqual(output, "output")
     
         subprocess_mock.assert_called_with(
-            ["nosetests", "-v", "testname"],
+            ["nosetests", "-v", "-s", "testname"],
             stderr=subprocess.STDOUT)
         
         subprocess_mock.side_effect = subprocess.CalledProcessError(
