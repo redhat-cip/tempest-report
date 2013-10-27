@@ -21,10 +21,14 @@ description_list = {
     # Level 0: minimal tests that don't require an admin account, only for discovering
     'tempest.cli.simple_read_only.test_keystone:SimpleReadOnlyKeystoneClientTest.test_admin_discover': {'service': 'Identity Service (Keystone)', 'level': 0},
     'tempest.cli.simple_read_only.test_glance:SimpleReadOnlyGlanceClientTest.test_glance_image_list': {'service': 'Image Service (Glance)', 'level': 0},
-    'tempest.cli.simple_read_only.test_nova:SimpleReadOnlyNovaClientTest.test_admin_flavor_list': {'service': 'Compute (Nova)', 'level': 0},
-    'tempest.cli.simple_read_only.test_cinder:SimpleReadOnlyCinderClientTest.test_cinder_volumes_list': {'service': 'Volume Service (Cinder)', 'level': 0},
+    'tempest.cli.simple_read_only.test_nova:SimpleReadOnlyNovaClientTest.test_admin_flavor_list': {'service': 'Compute (Nova)', 'level': 2},
+    'tempest.cli.simple_read_only.test_cinder:SimpleReadOnlyCinderClientTest.test_cinder_volumes_list': {'service': 'Volume Service (Cinder)', 'level': 2},
     'tempest.api.object_storage.test_container_services:ContainerTest.test_create_container': {'service': 'Object Storage (Swift)', 'level': 0},
 
+    'tempest_report.tempest_addons:NovaExtensionTest': {'service': 'Compute (Nova)', 'level': 0},
+    'tempest_report.tempest_addons:CinderExtensionTest': {'service': 'Volume Service (Cinder)', 'level': 0},
+    'tempest_report.tempest_addons:NeutronExtensionTest': {'service': 'Network (Neutron)', 'level': 0},
+    
     # Level 1 (default): service/extension discovery, used to make an educated guess about OpenStack release
     # Object Storage (Swift)
     'tempest.api.object_storage.test_container_quotas': {'service': 'Object Storage (Swift)', 'feature': 'Container Quota', 'release': 7, },
@@ -40,7 +44,6 @@ description_list = {
     'tempest_report.tempest_addons:GlanceV1Test': {'service': 'Image Service (Glance)', 'feature': 'V1 Api', }, 
     'tempest_report.tempest_addons:GlanceV2Test': {'service': 'Image Service (Glance)', 'feature': 'V2 Api', 'release': 6 },
  
-    'tempest_report.tempest_addons:NovaExtensionTest': {'service': 'Compute (Nova)', 'level': 0},
     'nova-extension-os-user-quotas': {'service': 'Compute (Nova)', 'feature': 'Project user quota support', 'dummy': True},
     'nova-extension-NMN': {'service': 'Compute (Nova)', 'feature': 'Multi-NIC Support', 'release': 5, 'level': 0, 'dummy': True},
     'nova-extension-OS-EXT-STS': {'service': 'Compute (Nova)', 'feature': 'Extended Status support', 'release': 5, 'dummy': True},
@@ -65,7 +68,6 @@ description_list = {
     'nova-extension-os-virtual-interfaces': {'service': 'Compute (Nova)', 'feature': 'Virtual interface support', 'dummy': True},
     'nova-extension-os-volumes': {'service': 'Compute (Nova)', 'feature': 'Volumes support', 'dummy': True},
 
-    'tempest_report.tempest_addons:CinderExtensionTest': {'service': 'Volume Service (Cinder)', 'level': 0},
     'cinder-extension-os-admin-actions': {'service': 'Volume Service (Cinder)', 'feature': 'Enable admin actions', 'release': 6, 'dummy': True}, 
     'cinder-extension-os-availability-zone': {'service': 'Volume Service (Cinder)', 'feature': 'Describe Availability Zones', 'dummy': True}, 
     'cinder-extension-backups': {'service': 'Volume Service (Cinder)', 'feature': 'Backups support', 'release': 7, 'dummy': True}, 
@@ -84,10 +86,7 @@ description_list = {
     'cinder-extension-os-vol-mig-status-attr': {'service': 'Volume Service (Cinder)', 'feature': 'Expose migration status as attribute', 'dummy': True}, 
     'cinder-extension-os-volume-transfer': {'service': 'Volume Service (Cinder)', 'feature': 'Volume transfer management support', 'dummy': True}, 
     'cinder-extension-encryption': {'service': 'Volume Service (Cinder)', 'feature': 'Volume encryption', 'release': 8, 'dummy': True}, 
-    
 
-
-    'tempest_report.tempest_addons:NeutronExtensionTest': {'service': 'Network (Neutron)', 'level': 0},
 
     'neutron-extension-security-group': {'service': 'Network (Neutron)', 'feature': 'security-group', 'release': 7, 'dummy': True}, 
     'neutron-extension-l3-agent-scheduler': {'service': 'Network (Neutron)', 'feature': 'L3 Agent Scheduler', 'release': 6, 'dummy': True}, 
