@@ -37,19 +37,23 @@ class NovaExtensionTest(tempest.api.compute.base.BaseV2ComputeTest):
 class CinderExtensionTest(tempest.cli.ClientTestBase):
     def test_extensions(self):
         m = re.compile('\|.*\|.*\|\s+([A-Za-z-]*)\s+\|.*\|')
-        for line in self.cinder('list-extensions').split('\n'):
+        extensions = self.cinder('list-extensions').split('\n')
+        for line in extensions:
             res = m.search(line)
             if res:
                 print "cinder-extension-%s ... ok" % res.group(1)
+        self.assertTrue(extensions)
 
 
 class NeutronExtensionTest(tempest.cli.ClientTestBase):
     def test_extensions(self):
         m = re.compile('\|\s+([A-Za-z-]*)\s+\|.*\|')
-        for line in self.neutron('ext-list').split('\n'):
+        extensions = self.neutron('ext-list').split('\n')
+        for line in extensions:
             res = m.search(line)
             if res:
                 print "neutron-extension-%s ... ok" % res.group(1)
+        self.assertTrue(extensions)
 
 
 class CeilometerTest(tempest.cli.ClientTestBase):
