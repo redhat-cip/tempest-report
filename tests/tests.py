@@ -320,9 +320,10 @@ class UtilTest(unittest.TestCase):
             raise QueueEmpty()
 
         successful_tests = []
+        successful_subtests = []
         tempest_report.utils.executer.return_value = (True, "")
         queue.get_nowait.side_effect = side_effect 
-        utils.worker(queue, successful_tests)
+        utils.worker(queue, successful_tests, successful_subtests)
 
         queue.get_nowait.assert_called_with()
         logger.assert_called_with('tempest_report')

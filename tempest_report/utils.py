@@ -282,6 +282,8 @@ def worker(queue, successful_tests, successful_subtests, verbose=False):
 
         if verbose:
             logger.info(msg)
+        else:
+            logger.debug(msg)
 
         queue.task_done()
 
@@ -318,8 +320,10 @@ def main(options):
         for test, values in settings.description_list.items():
             test_level = values.get('level', 1)
             release_level = values.get('release', 0)
+            dummy = values.get('dummy', False)
             if (int(test_level) <= int(options.level) and
-                    int(release_level) <= int(options.max_release_level)):
+                    int(release_level) <= int(options.max_release_level) and
+                    not dummy):
                 queue.put((test, configfile.name))
                 all_tests.append(test)
     else:
