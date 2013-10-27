@@ -44,65 +44,12 @@ class CinderExtensionTest(tempest.cli.ClientTestBase):
 
 
 class NeutronExtensionTest(tempest.cli.ClientTestBase):
-    def _get_extensions(self):
-        if not hasattr(self, 'extensions'):
-            self.extensions = self.neutron('ext-list')
-
-    def test_security_group(self):
-        self._get_extensions()
-        self.assertIn("security-group", self.extensions)
-
-    def test_l3_agent_scheduler(self):
-        self._get_extensions()
-        self.assertIn("l3_agent_scheduler", self.extensions)
-
-    def test_ext_gw_mode(self):
-        self._get_extensions()
-        self.assertIn("ext-gw-mode", self.extensions)
-
-    def test_binding(self):
-        self._get_extensions()
-        self.assertIn("binding", self.extensions)
-
-    def test_quotas(self):
-        self._get_extensions()
-        self.assertIn("quotas", self.extensions)
-
-    def test_agent(self):
-        self._get_extensions()
-        self.assertIn("agent", self.extensions)
-
-    def test_dhcp_agent_scheduler(self):
-        self._get_extensions()
-        self.assertIn("dhcp_agent_scheduler", self.extensions)
-
-    def test_multi_provider(self):
-        self._get_extensions()
-        self.assertIn("multi-provider", self.extensions)
-
-    def test_external_net(self):
-        self._get_extensions()
-        self.assertIn("external-net", self.extensions)
-
-    def test_router(self):
-        self._get_extensions()
-        self.assertIn("router", self.extensions)
-
-    def test_allowed_address_pairs(self):
-        self._get_extensions()
-        self.assertIn("allowed-address-pairs", self.extensions)
-
-    def test_extra_dhcp_opt(self):
-        self._get_extensions()
-        self.assertIn("extra_dhcp_opt", self.extensions)
-
-    def test_provider(self):
-        self._get_extensions()
-        self.assertIn("provider", self.extensions)
-
-    def test_extraroute(self):
-        self._get_extensions()
-        self.assertIn("extraroute", self.extensions)
+    def test_extensions(self):
+        m = re.compile('\|\s+([A-Za-z-]*)\s+\|.*\|')
+        for line in self.neutron('ext-list').split('\n'):
+            res = m.search(line)
+            if res:
+                print "neutron-extension-%s ... ok" % res.group(1)
 
 
 class CeilometerTest(tempest.cli.ClientTestBase):
