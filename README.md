@@ -13,7 +13,7 @@ Using a fresh Ubuntu Server (12.0.4 LTS) installation you need to install these 
 
 2) Clone repository
 
-    git clone git@github.com:enovance/tempest-report.git
+    git clone https://github.com/enovance/tempest-report.git
     cd tempest-report
 
 3) Install requirements
