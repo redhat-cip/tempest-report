@@ -265,13 +265,14 @@ class UtilTest(unittest.TestCase):
         tempest_report.utils.write_conf.assert_called_with(
             'user', 'password', 'keystone_url', 
             'tenant_name', 23, 42, fileobj, 
-            {'image': 'url'})
+            {'image': 'url'}, None)
 
     def test_write_conf(self):
 
         fileobj = DummyFileObject()
         utils.write_conf("user", "password", "keystone_url", "tenant",
-                         "image_id", "flavor_id", fileobj, {'compute': 'url'})
+                         "image_id", "flavor_id", fileobj, {'compute': 'url'},
+                         'network-id')
         
         self.assertIn("[DEFAULT]", fileobj.content)
         self.assertIn("use_stderr = False", fileobj.content)
