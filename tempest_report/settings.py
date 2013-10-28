@@ -56,7 +56,6 @@ description_list = {
 
     # Level 1 (default): service/extension discovery, used to make an educated guess about OpenStack release
     'tempest.cli.simple_read_only.test_glance:SimpleReadOnlyGlanceClientTest.test_glance_image_list': {},
-    'tempest.api.object_storage.test_container_services:ContainerTest.test_create_container': {},
 
     'tempest_report.tempest_addons:NovaExtensionTest': {},
     'tempest_report.tempest_addons:CinderExtensionTest': {},
@@ -248,15 +247,9 @@ description_list = {
     'tempest.api.network.test_networks': {'level': 3},
     'tempest.api.network.test_security_groups_negative': {'level': 3},
     'tempest.api.network.test_vpnaas_extensions': {'level': 3},
-    'tempest.api.object_storage.test_container_quotas': {'level': 3},
     'tempest.api.object_storage.test_container_services': {'level': 3},
-    'tempest.api.object_storage.test_container_sync': {'level': 3},
-    'tempest.api.object_storage.test_container_staticweb': {'level': 3},
-    'tempest.api.object_storage.test_object_expiry': {'level': 3},
-    'tempest.api.object_storage.test_object_version': {'level': 3},
     'tempest.api.orchestration.stacks.test_limits': {'level': 3},
     'tempest.api.orchestration.stacks.test_neutron_resources': {'level': 3},
-    'tempest.api.object_storage.test_object_temp_url': {'level': 3},
     'tempest.api.orchestration.stacks.test_non_empty_stack': {'level': 3},
     'tempest.api.orchestration.stacks.test_stacks': {'level': 3},
     'tempest.api.orchestration.stacks.test_server_cfn_init': {'level': 3},
