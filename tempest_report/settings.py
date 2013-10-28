@@ -124,6 +124,12 @@ description_list = {
     'ceilometer-meter-network': {'feature': 'Network usage', 'release': 0, 'dummy': True},
     'ceilometer-meter-subnet': {'feature': 'Network usage', 'release': 0, 'dummy': True},
     'ceilometer-meter-router': {'feature': 'Network usage', 'release': 0, 'dummy': True},
+    'ceilometer-meter-cpu': {'feature': 'CPU', 'release': 0, 'dummy': True},
+    'ceilometer-meter-image': {'feature': 'Image', 'release': 0, 'dummy': True},
+    'ceilometer-meter-instance': {'feature': 'Instance', 'release': 0, 'dummy': True},
+    'ceilometer-meter-memory': {'feature': 'Memory', 'release': 0, 'dummy': True},
+    'ceilometer-meter-vcpus': {'feature': 'VCPUs', 'release': 0, 'dummy': True},
+    'ceilometer-meter-volume': {'feature': 'Volume', 'release': 0, 'dummy': True},
 
     # Level 2: Scenario tests
     'tempest.scenario.test_dashboard_basic_ops': {'level': 2, 'feature': 'Dashboard (Horizon)', },
