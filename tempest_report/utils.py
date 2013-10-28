@@ -19,6 +19,7 @@ import urlparse
 import keystoneclient.generic.client
 import keystoneclient.v2_0
 import glanceclient
+import neutronclient.common.clientmanager
 import novaclient.client
 import tempest.config
 
@@ -199,12 +200,17 @@ def customized_tempest_conf(user, password, keystone_url, fileobj, tenant_name=N
     images = get_images(_scoped_token.get('id'), imageservice_url)
     smallest_image = get_smallest_image(images)
 
-    write_conf(user, password, keystone_url, tenant_name,
-               smallest_image.id, smallest_flavor.id, fileobj, services)
+    try:
+        network_id = get_external_network_id(keystone_url, user, password, tenant_name)
+    except Exception as ex:
+        network_id = 0
+
+    write_conf(user, password, keystone_url, tenant_name, smallest_image.id,
+               smallest_flavor.id, fileobj, services, network_id)
 
 
-def write_conf(user, password, keystone_url, tenant,
-               image_id, flavor_id, fileobj, services):
+def write_conf(user, password, keystone_url, tenant, image_id,
+               flavor_id, fileobj, services, network_id):
 
     cfg = tempest.config.TempestConfig()
 
@@ -240,6 +246,8 @@ def write_conf(user, password, keystone_url, tenant,
     tempest_config.set('compute', 'allow_tenant_isolation', "False")
     tempest_config.set('compute', 'flavor_ref', flavor_id)
     tempest_config.set('compute', 'flavor_ref_alt', flavor_id)
+
+    tempest_config.set('network', 'public_network_id', str(network_id))
 
     run_services = [('volume', 'cinder'),
                 ('image','glance'),
@@ -369,4 +377,25 @@ def main(options):
 
     os.remove(configfile.name)
 
+
+def get_external_network_id(auth_url, username, password, tenant_name):
+    client_manager = neutronclient.common.clientmanager.ClientManager(
+            auth_url=auth_url,
+            username=username,
+            password=password,
+            tenant_name=tenant_name,
+            auth_strategy="keystone",
+            endpoint_type='publicURL',
+            api_version={'network': '2.0'}
+            )
+    
+    try:
+        networks = client_manager.neutron.list_networks().get('networks', {})
+    except Exception as ex:
+        networks = []
+    
+    external_networks = [net for net in networks if net.get('router:external')]
+    if external_networks:
+        return external_networks[0].get('id')
+    return None
 
