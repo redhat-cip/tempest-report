@@ -75,6 +75,7 @@ description_list = {
     'tempest_report.tempest_addons:GlanceV2Test': {'feature': 'V2 Api', 'release': 6},
 
     # List of extensions
+    'nova-extension-OS-DCF': {'feature': 'Disk Management Extension', 'release': 5, 'dummy': True},
     'nova-extension-NMN': {'feature': 'Multi-NIC Support', 'release': 5,  'dummy': True},
     'nova-extension-OS-EXT-STS': {'feature': 'Extended Status support', 'release': 5, 'dummy': True},
     'nova-extension-user-data': {'feature': 'User Data support', 'release': 5, 'dummy': True},
@@ -92,7 +93,6 @@ description_list = {
     'nova-extension-os-server-password': {'feature': 'Server password support', 'release': 7, 'dummy': True},
     'nova-extension-os-fixed-ips': {'feature': 'Fixed IPs support', 'release': 7, 'dummy': True},
     'nova-extension-OS-EXT-AZ': {'feature': 'Extended Server Attributes', 'release': 7, 'dummy': True},
-    'nova-extension-OS-DCF': {'feature': 'Disk Management Extension', 'release': 8, 'dummy': True},
     'nova-extension-os-assisted-volume-snapshots': {'feature': 'Assisted volume snapshots', 'release': 8, 'dummy': True},
     'nova-extension-os-extended-volumes': {'feature': 'Extended Volumes support', 'release': 8, 'dummy': True},
     'nova-extension-os-user-quotas': {'feature': 'Project user quota support', 'release': 8, 'dummy': True},
