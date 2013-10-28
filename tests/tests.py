@@ -109,24 +109,17 @@ class UtilTest(unittest.TestCase):
 
     def test_summary(self):
         dscr = {
-            'test.a' : {'service': 'A',
+            'tempest.api.compute' : {'service': 'Compute (Nova)',
                         'feature': '1',
-                        'release': 0},
-            'test.b' : {'service': 'B',
-                        'feature': '2',
                         'release': 5},
             }
 
         with mock.patch.dict(settings.description_list, dscr):
-            
-            successful_tests = ['test.a', 'test.b']
+            successful_tests = ['tempest.api.compute']
             summary = utils.service_summary(successful_tests)
-            
-            assert 'A' in summary
-            assert '1' in summary.get('A').features
-            assert 'B' in summary
-            assert '2' in summary.get('B').features
-            release_name = summary.get('B').release_name
+            assert 'Compute (Nova)' in summary
+            assert '1' in summary.get('Compute (Nova)').features
+            release_name = summary.get('Compute (Nova)').release_name
             self.assertEqual(release_name, 'Essex (or later)')
 
     def test_summary_class(self):

@@ -9,6 +9,31 @@ name_mapping = {
     9: 'Icehouse (or later)',
 }
 
+service_names = {
+    'tempest.api.object_storage': 'Object Storage (Swift)',
+    'tempest.api.compute': 'Compute (Nova)',
+    'tempest.api.image': 'Image (Cinder)',
+    'tempest.api.network': 'Network (Neutron)',
+    'tempest.api.orchestration': 'Orchestration (Heat)',
+    'tempest.scenario': 'Scenario',
+    'tempest.cli.simple_read_only.test_cinder': 'Image (Cinder)',
+    'tempest.cli.simple_read_only.test_glance': 'Volume (Glance)',
+    'tempest.cli.simple_read_only.test_keystone': 'Identity (Keystone)',
+    'tempest.cli.simple_read_only.test_neutron': 'Network (Neutron)',
+    'tempest.cli.simple_read_only.test_nova': 'Compute (Nova)',
+    'tempest.cli.simple_read_only.test_nova_manage': 'Compute (Nova)',
+    'tempest_report.tempest_addons:CeilometerTest': 'Metering (Ceilometer)',
+    'tempest_report.tempest_addons:NeutronExtensionTest': 'Network (Neutron)',
+    'tempest_report.tempest_addons:NovaExtensionTest': 'Compute (Nova)',
+    'tempest_report.tempest_addons:CinderExtensionTest': 'Image (Cinder)',
+    'nova-extension': 'Compute (Nova)',
+    'cinder-extension': 'Image (Cinder)',
+    'neutron-extension': 'Network (Neutron)',
+    'ceilometer-meter': 'Metering (Ceilometer)',
+    'tempest_report.tempest_addons:Glance': 'Volume (Glance)', 
+    'tempest_report.tempest_addons:Glance': 'Volume (Glance)',
+}
+
 description_list = {
     # Levels:
     # 0: only basic discovery and readonly operations

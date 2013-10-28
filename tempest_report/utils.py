@@ -49,18 +49,18 @@ class ServiceSummary(object):
 def service_summary(successful_tests):
     services = {}
     for test in successful_tests:
-        result = settings.description_list.get(str(test))
-        if result:
-            service = result.get('service')
-            release = result.get('release', 0)
-            feature = result.get('feature')
-
-            if not service in services:
-                services[service] = ServiceSummary(service)
-
-            services[service].set_release(release)
-            services[service].add_feature(feature)
-
+        service = [service for prefix, service in settings.service_names.items()
+                   if prefix in test]
+        if service:
+            service_name = service[0]
+            if not service_name in services:
+                services[service_name] = ServiceSummary(service_name)
+            result = settings.description_list.get(str(test))
+            if result:
+                release = result.get('release', 0)
+                feature = result.get('feature')
+                services[service_name].set_release(release)
+                services[service_name].add_feature(feature)
     return services
 
 
