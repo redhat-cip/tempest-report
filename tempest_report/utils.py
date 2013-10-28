@@ -66,7 +66,7 @@ def service_summary(successful_tests):
     services = {}
     for test in successful_tests:
         service = [service for prefix, service in settings.service_names.items()
-                   if prefix in test]
+                   if prefix in str(test)]
         if service:
             service_name = service[0]
             if not service_name in services:
