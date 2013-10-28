@@ -21,6 +21,11 @@ import tempest.api.image.base
 import tempest.api.compute.base
 import tempest.cli
 
+try:
+       from tempest.api.compute.base import BaseV2ComputeTest as BaseComputeTest
+except ImportError:
+       from tempest.api.compute.base import BaseComputeTest as BaseComputeTest
+
 
 class GlanceV2Test(tempest.api.image.base.BaseV2ImageTest):
 
@@ -38,7 +43,7 @@ class GlanceV1Test(tempest.api.image.base.BaseV1ImageTest):
         self.assertTrue(len(images_list) > 0)
 
 
-class NovaExtensionTest(tempest.api.compute.base.BaseV2ComputeTest):
+class NovaExtensionTest(BaseComputeTest):
     _interface = 'json'
 
     def test_extensions(self):
