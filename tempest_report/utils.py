@@ -23,6 +23,7 @@ import os
 import pkgutil
 import Queue
 import re
+import StringIO
 import subprocess
 import tempest
 import tempfile
@@ -196,7 +197,7 @@ def get_smallest_image(images):
     return smallest_image
 
 
-def customized_tempest_conf(user, password, keystone_url, fileobj, tenant_name=None):
+def customized_tempest_conf(user, password, keystone_url, tenant_name=None):
     keystone_client, keystone_url = get_keystone_client(keystone_url)
     tenants, token = get_tenants(user, password, keystone_url, keystone_client)
 
@@ -220,12 +221,14 @@ def customized_tempest_conf(user, password, keystone_url, fileobj, tenant_name=N
     except Exception as ex:
         network_id = 0
 
-    write_conf(user, password, keystone_url, tenant_name, smallest_image.id,
-               smallest_flavor.id, fileobj, services, network_id)
-
+    content = write_conf(user, password, keystone_url, tenant_name, smallest_image.id,
+               smallest_flavor.id, services, network_id)
+    
+    return content
+    
 
 def write_conf(user, password, keystone_url, tenant, image_id,
-               flavor_id, fileobj, services, network_id):
+               flavor_id, services, network_id):
 
     cfg = tempest.config.TempestConfig()
 
@@ -274,9 +277,10 @@ def write_conf(user, password, keystone_url, tenant, image_id,
     for service, name in run_services:
         run = "True" if services.get(service) else "False"
         tempest_config.set('service_available', name, run)
-
-    with fileobj:
-        tempest_config.write(fileobj)
+    
+    fileobj = StringIO.StringIO()
+    tempest_config.write(fileobj)
+    return fileobj.getvalue()
 
 
 def worker(queue, successful_tests, successful_subtests, verbose=False):
@@ -329,10 +333,14 @@ def main(options):
     logger.addHandler(console)
     logger.addHandler(logfile)
 
+    config = customized_tempest_conf(options.os_username,
+                                     options.os_password,
+                                     options.os_auth_url,
+                                     options.os_tenant_name)
+    
     configfile = tempfile.NamedTemporaryFile(delete=False)
-    customized_tempest_conf(options.os_username, options.os_password,
-                            options.os_auth_url, configfile,
-                            options.os_tenant_name)
+    with configfile:
+        configfile.write(config)
 
     queue = Queue.Queue()
     successful_tests = []

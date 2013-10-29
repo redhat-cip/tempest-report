@@ -258,61 +258,58 @@ class UtilTest(unittest.TestCase):
         tempest_report.utils.get_services.return_value = (
             {'image': 'url'}, {'id': 'id'})
 
-        fileobj = mock.Mock()
         utils.customized_tempest_conf("user", "password",
-            "http://keystone_url", fileobj)
+            "http://keystone_url")
 
         tempest_report.utils.write_conf.assert_called_with(
             'user', 'password', 'keystone_url', 
-            'tenant_name', 23, 42, fileobj, 
-            {'image': 'url'}, None)
+            'tenant_name', 23, 42, {'image': 'url'}, None)
 
     def test_write_conf(self):
 
-        fileobj = DummyFileObject()
-        utils.write_conf("user", "password", "keystone_url", "tenant",
-                         "image_id", "flavor_id", fileobj, {'compute': 'url'},
+        content = utils.write_conf("user", "password", "keystone_url", "tenant",
+                         "image_id", "flavor_id", {'compute': 'url'},
                          'network-id')
         
-        self.assertIn("[DEFAULT]", fileobj.content)
-        self.assertIn("use_stderr = False", fileobj.content)
-        self.assertIn("log_file = tempest.log", fileobj.content)
-        self.assertIn("[stress]", fileobj.content)
-        self.assertIn("[compute]", fileobj.content)
-        self.assertIn("image_ref = image_id", fileobj.content)
-        self.assertIn("image_ref_alt = image_id", fileobj.content)
-        self.assertIn("allow_tenant_isolation = False", fileobj.content)
-        self.assertIn("flavor_ref = flavor_id", fileobj.content)
-        self.assertIn("flavor_ref_alt = flavor_id", fileobj.content)
-        self.assertIn("[network]", fileobj.content)
-        self.assertIn("[boto]", fileobj.content)
-        self.assertIn("[scenario]", fileobj.content)
-        self.assertIn("[object_storage]", fileobj.content)
-        self.assertIn("operator_role = tenant", fileobj.content)
-        self.assertIn("[volume]", fileobj.content)
-        self.assertIn("[debug]", fileobj.content)
-        self.assertIn("[dashboard]", fileobj.content)
-        self.assertIn("[orchestration]", fileobj.content)
-        self.assertIn("[compute_admin]", fileobj.content)
-        self.assertIn("[images]", fileobj.content)
-        self.assertIn("[service_available]", fileobj.content)
-        self.assertIn("cinder = False", fileobj.content)
-        self.assertIn("glance = False", fileobj.content)
-        self.assertIn("swift = False", fileobj.content)
-        self.assertIn("nova = True", fileobj.content)
-        self.assertIn("neutron = False", fileobj.content)
-        self.assertIn("[identity]", fileobj.content)
-        self.assertIn("uri = keystone_url", fileobj.content)
-        self.assertIn("username = user", fileobj.content)
-        self.assertIn("alt_username = user", fileobj.content)
-        self.assertIn("admin_username = user", fileobj.content)
-        self.assertIn("password = password", fileobj.content)
-        self.assertIn("alt_password = password", fileobj.content)
-        self.assertIn("admin_password = password", fileobj.content)
-        self.assertIn("tenant_name = tenant", fileobj.content)
-        self.assertIn("alt_tenant_name = tenant", fileobj.content)
-        self.assertIn("admin_tenant_name = tenant", fileobj.content)
-        self.assertIn("admin_role = tenant", fileobj.content)
+        self.assertIn("[DEFAULT]", content)
+        self.assertIn("use_stderr = False", content)
+        self.assertIn("log_file = tempest.log", content)
+        self.assertIn("[stress]", content)
+        self.assertIn("[compute]", content)
+        self.assertIn("image_ref = image_id", content)
+        self.assertIn("image_ref_alt = image_id", content)
+        self.assertIn("allow_tenant_isolation = False", content)
+        self.assertIn("flavor_ref = flavor_id", content)
+        self.assertIn("flavor_ref_alt = flavor_id", content)
+        self.assertIn("[network]", content)
+        self.assertIn("[boto]", content)
+        self.assertIn("[scenario]", content)
+        self.assertIn("[object_storage]", content)
+        self.assertIn("operator_role = tenant", content)
+        self.assertIn("[volume]", content)
+        self.assertIn("[debug]", content)
+        self.assertIn("[dashboard]", content)
+        self.assertIn("[orchestration]", content)
+        self.assertIn("[compute_admin]", content)
+        self.assertIn("[images]", content)
+        self.assertIn("[service_available]", content)
+        self.assertIn("cinder = False", content)
+        self.assertIn("glance = False", content)
+        self.assertIn("swift = False", content)
+        self.assertIn("nova = True", content)
+        self.assertIn("neutron = False", content)
+        self.assertIn("[identity]", content)
+        self.assertIn("uri = keystone_url", content)
+        self.assertIn("username = user", content)
+        self.assertIn("alt_username = user", content)
+        self.assertIn("admin_username = user", content)
+        self.assertIn("password = password", content)
+        self.assertIn("alt_password = password", content)
+        self.assertIn("admin_password = password", content)
+        self.assertIn("tenant_name = tenant", content)
+        self.assertIn("alt_tenant_name = tenant", content)
+        self.assertIn("admin_tenant_name = tenant", content)
+        self.assertIn("admin_role = tenant", content)
 
     @mock.patch('logging.getLogger')
     @mock.patch('Queue.Queue')
@@ -356,12 +353,13 @@ class UtilTest(unittest.TestCase):
         options.verbose = False
 
         thread.return_value.isAlive = lambda: False
-        
+
+        customized_conf.return_value = "dummy_content"
         with mock.patch(
             'tempest_report.settings.description_list',
             {'testname': {}}):
             utils.main(options)
-        
+
         logger.getLogger().info.assert_any_call(
             '\nFailed tests:\ntestname')
         
