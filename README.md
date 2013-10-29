@@ -34,54 +34,87 @@ Usage
     export OS_PASSWORD=devstack
     export OS_AUTH_URL=http://127.0.0.1:5000/v2.0/
 
-2) Run basic tests:
+2) Run basic extension and release discovery:
 
     $ source tempest.env
     $ tempest_report
 
     Failed tests:
-    tempest.api.object_storage.test_object_version
+    tempest.api.object_storage.test_container_sync
     
     Successful tests:
-    tempest_report.tempest_addons:NovaExtensionTest.test_server_password
+    tempest_report.tempest_addons:NeutronExtensionTest
+    tempest_report.tempest_addons:NovaExtensionTest
     tempest_report.tempest_addons:GlanceV1Test
-    tempest.api.object_storage.test_object_temp_url:ObjectTempUrlTest.test_get_object_using_temp_url
-    tempest.cli.simple_read_only.test_keystone:SimpleReadOnlyKeystoneClientTest.test_admin_discover
-    tempest.thirdparty.boto.test_s3_buckets
-    tempest_report.tempest_addons:NovaExtensionTest.test_volume_support
-    tempest_report.tempest_addons:GlanceV2Test
-    tempest.api.object_storage.test_container_quotas
-    tempest_report.tempest_addons:NovaExtensionTest.test_user_data
     tempest.api.object_storage.test_object_expiry
-    tempest.thirdparty.boto.test_ec2_instance_run
-    tempest.api.object_storage.test_container_staticweb
-    tempest_report.tempest_addons:NovaExtensionTest.test_multinic
-    tempest.api.object_storage.test_container_services
-    tempest_report.tempest_addons:NovaExtensionTest.test_extended_status
     tempest.cli.simple_read_only.test_glance:SimpleReadOnlyGlanceClientTest.test_glance_image_list
-    tempest.api.object_storage.test_container_sync
-    tempest.cli.simple_read_only.test_nova_manage
-    tempest.cli.simple_read_only.test_cinder:SimpleReadOnlyCinderClientTest.test_cinder_volumes_list
-    tempest.api.object_storage.test_container_services:ContainerTest.test_create_container
+    tempest_report.tempest_addons:CeilometerTest
+    tempest.api.object_storage.test_container_staticweb
+    tempest.api.object_storage.test_object_version
+    tempest_report.tempest_addons:GlanceV2Test
+    tempest.api.object_storage.test_object_temp_url:ObjectTempUrlTest.test_get_object_using_temp_url
+    tempest.api.object_storage.test_container_quotas
+    tempest_report.tempest_addons:CinderExtensionTest
+    tempest.scenario.test_dashboard_basic_ops
     
-    Identity Service (Keystone): 
-    Compute (Nova): Grizzly
-    				Server password support
-    				Volume Support
-    				User Data support
-    				EC2 API
-    				Multi-NIC Support
-    				Extended Status support
-    Image Service (Glance): Folsom
+    Network (Neutron): Havana (or later)
+    				Neutron L3 Configurable external gateway mode
+                    
+                    [... shortened list ...]
+    				
+                    Quota management support
+    
+    Scenario: 
+    				Dashboard (Horizon)
+    
+    Compute (Nova): Havana (or later)
+    				Multinic
+                    
+                    [... shortened list ...]
+    				
+    				Volumes
+    
+    Metering (Ceilometer): 
+    				Disk Usage
+    
+    Object Storage (Swift): Grizzly (or later)
+    				Object expiring
+    				Static Web
+    				Object versioning
+    				Temporary object URL
+    				Container Quota
+    
+    Image (Cinder): Havana (or later)
+    				Enable admin actions
+    				
+                    [... shortened list ...]
+                    
+                    Volume encryption
+    
+    Volume (Glance): Folsom (or later)
     				V1 Api
     				V2 Api
-    Object Storage (Swift): Grizzly
-    				Temporary object URL
-    				S3 API
-    				Container Quota
-    				Static Web
-    Volume Service (Cinder): 
 
+
+You can increase the test level if you want to run more detailed tests from tempest. Test level 2 runs scenario tests, level 3 
+runs all tempest tests that don't require an admin account.
+
+Level 1: extension tests
+------------------------
+Some services return a list of installed extensions, for example Nova, Cinder and Neutron. Since every OpenStack Release adds new
+extensions an educated guess can be made to report the installed OpenStack relese.
+To make this also possible for other services an additional set of tempest tests is run, for example to get available Swift middlewares.
+
+Level 2: scenario tests
+-----------------------
+These are longer-running tests simulating actual real-life scenarios. For example the scenario ``tempest.scenario.test_minimum_basic``
+simulates this scenario: create a Glance image, boot a Nova instance, create a Cinder volume, attach it, reboot instance, add a floating
+IP, ssh into server. 
+Level 2 tests can be used to confirm a working OpenStack installation from an user point of view.
+
+Level 3: detailed tests
+-----------------------
+These are all tests from tempest, that don't require an admin account to finish successfully. 
 
 Testing
 -------
