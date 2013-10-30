@@ -66,7 +66,7 @@ description_list = {
     'tempest_report.tempest_addons:KeystoneTest': {},
     
     # Horizon login - quick scenario (login)
-    'tempest.scenario.test_dashboard_basic_ops': {},
+    'tempest.scenario.test_dashboard_basic_ops': {'feature': 'Login'},
 
     # Swift
     'tempest.api.object_storage.test_container_quotas': {'feature': 'Container Quota', 'release': 7, },
