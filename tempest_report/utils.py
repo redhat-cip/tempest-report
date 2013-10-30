@@ -62,6 +62,9 @@ class ServiceSummary(object):
         if feature and feature not in self.features:
             self.features.append(feature)
 
+    def get_features(self):
+        return sorted(self.features)
+        
 
 def service_summary(successful_tests):
     services = {}
@@ -395,7 +398,7 @@ def main(options):
     passed_tests = successful_tests + successful_subtests
     for _, service in sorted(service_summary(passed_tests).items()):
         summary += "\n%s: %s\n" % (service.name, service.release_name)
-        for feature in sorted(service.features):
+        for feature in service.get_features():
             summary += "\t\t\t\t%s\n" % (feature,)
     logger.info(summary)
 
