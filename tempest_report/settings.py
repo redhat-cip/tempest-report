@@ -44,6 +44,7 @@ service_names = {
     'cinder-extension': 'Image (Cinder)',
     'neutron-extension': 'Network (Neutron)',
     'ceilometer-meter': 'Metering (Ceilometer)',
+    'keystone-extension': 'Identity (Keystone)',
     'tempest_report.tempest_addons:Glance': 'Volume (Glance)',
     'tempest_report.tempest_addons:Glance': 'Volume (Glance)',
 }
@@ -61,7 +62,8 @@ description_list = {
     'tempest_report.tempest_addons:CinderExtensionTest': {},
     'tempest_report.tempest_addons:NeutronExtensionTest': {},
     'tempest_report.tempest_addons:CeilometerTest': {},
-
+    'tempest_report.tempest_addons:KeystoneTest': {},
+    
     # Horizon login - quick scenario (login)
     'tempest.scenario.test_dashboard_basic_ops': {},
 
@@ -204,6 +206,9 @@ description_list = {
     'ceilometer-meter-memory': {'feature': 'Memory', 'release': 0, 'dummy': True},
     'ceilometer-meter-vcpus': {'feature': 'VCPUs', 'release': 0, 'dummy': True},
     'ceilometer-meter-volume': {'feature': 'Volume', 'release': 0, 'dummy': True},
+    
+    'keystone-extension-OS-EC2': {'feature': 'OpenStack EC2 API', 'dummy': True},
+    'keystone-extension-OS-KSCRUD': {'feature': 'OpenStack Keystone User CRUD', 'dummy': True},
 
     # Level 2: Scenario tests
     'tempest.scenario.test_large_ops': {'level': 2, 'feature': 'Large Operation Scenario (Nova & Glance)', },

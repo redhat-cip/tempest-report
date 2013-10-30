@@ -14,7 +14,9 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import json
 import re
+import requests
 
 import ceilometerclient.client
 import tempest.api.image.base
@@ -87,3 +89,18 @@ class CeilometerTest(tempest.cli.ClientTestBase):
             print "ceilometer-meter-%s ... ok" % meter.name
 
         self.assertTrue(ceilo)
+
+class KeystoneTest(tempest.cli.ClientTestBase):
+    def test_keystone(self):
+        extensions = []
+        try:
+            r = requests.get(self.config.identity.uri + '/extensions/')
+            data = json.loads(r.text)
+            extensions = data['extensions']['values']
+        except Exception:
+            pass
+        for ext in extensions:
+            alias = ext.get('alias')
+            if alias:
+                print "keystone-extension-%s ... ok" % alias
+        self.assertTrue(extensions)
