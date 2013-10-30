@@ -383,18 +383,19 @@ def main(options):
         except KeyboardInterrupt:
             break
 
-    failed_tests = '\n'.join([t for t in all_tests if t not in successful_tests])
+    failed_tests = '\n'.join(sorted([t for t in all_tests if t not in successful_tests]))
     if failed_tests:
         logger.info("\nFailed tests:\n%s" % failed_tests)
 
     if successful_tests:
-        logger.info("\nSuccessful tests:\n%s" % ('\n'.join(successful_tests)))
+        logger.info("\nSuccessful tests:\n%s" %
+                    ('\n'.join(sorted(successful_tests))))
 
     summary = ""
     passed_tests = successful_tests + successful_subtests
-    for _, service in service_summary(passed_tests).items():
+    for _, service in sorted(service_summary(passed_tests).items()):
         summary += "\n%s: %s\n" % (service.name, service.release_name)
-        for feature in service.features:
+        for feature in sorted(service.features):
             summary += "\t\t\t\t%s\n" % (feature,)
     logger.info(summary)
 
