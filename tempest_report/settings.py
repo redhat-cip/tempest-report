@@ -208,6 +208,7 @@ description_list = {
     'ceilometer-meter-vcpus': {'feature': 'VCPUs', 'release': 0, 'dummy': True},
     'ceilometer-meter-volume': {'feature': 'Volume', 'release': 0, 'dummy': True},
     
+    'keystone-extension-s3tokens': {'feature': 'OpenStack S3 API', 'dummy': True},
     'keystone-extension-OS-EC2': {'feature': 'OpenStack EC2 API', 'dummy': True},
     'keystone-extension-OS-KSCRUD': {'feature': 'OpenStack Keystone User CRUD', 'dummy': True},
 

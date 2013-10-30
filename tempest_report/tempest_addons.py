@@ -87,11 +87,26 @@ class CeilometerTest(tempest.cli.ClientTestBase):
             }))
         for meter in ceilo.meters.list():
             print "ceilometer-meter-%s ... ok" % meter.name
-
         self.assertTrue(ceilo)
 
 class KeystoneTest(tempest.cli.ClientTestBase):
-    def test_keystone(self):
+    def test_keystone_admin(self):
+        extensions = []
+        try:
+            url = self.config.identity.uri + '/extensions/'
+            url = url.replace('5000', '35357')
+            r = requests.get(url)
+            data = json.loads(r.text)
+            extensions = data['extensions']['values']
+        except Exception:
+            pass
+        for ext in extensions:
+            alias = ext.get('alias')
+            if alias:
+                print "keystone-extension-%s ... ok" % alias
+        self.assertTrue(extensions)
+
+    def test_keystone_user(self):
         extensions = []
         try:
             r = requests.get(self.config.identity.uri + '/extensions/')
