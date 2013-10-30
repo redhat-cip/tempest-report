@@ -30,6 +30,7 @@ service_names = {
     'tempest.api.network': 'Network (Neutron)',
     'tempest.api.orchestration': 'Orchestration (Heat)',
     'tempest.scenario': 'Scenario',
+    'tempest.scenario.test_dashboard_basic_ops': 'Dashboard (Horizon)',
     'tempest.cli.simple_read_only.test_cinder': 'Image (Cinder)',
     'tempest.cli.simple_read_only.test_glance': 'Volume (Glance)',
     'tempest.cli.simple_read_only.test_keystone': 'Identity (Keystone)',
