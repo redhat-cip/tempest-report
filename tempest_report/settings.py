@@ -62,6 +62,10 @@ description_list = {
     'tempest_report.tempest_addons:NeutronExtensionTest': {},
     'tempest_report.tempest_addons:CeilometerTest': {},
 
+    # Horizon login - quick scenario (login)
+    'tempest.scenario.test_dashboard_basic_ops': {},
+
+    # Swift
     'tempest.api.object_storage.test_container_quotas': {'feature': 'Container Quota', 'release': 7, },
     'tempest.api.object_storage.test_object_version': {'feature': 'Object versioning', 'release': 6, },
     'tempest.api.object_storage.test_object_temp_url:ObjectTempUrlTest.test_get_object_using_temp_url': {
@@ -202,7 +206,6 @@ description_list = {
     'ceilometer-meter-volume': {'feature': 'Volume', 'release': 0, 'dummy': True},
 
     # Level 2: Scenario tests
-    'tempest.scenario.test_dashboard_basic_ops': {'level': 2, 'feature': 'Dashboard (Horizon)', },
     'tempest.scenario.test_large_ops': {'level': 2, 'feature': 'Large Operation Scenario (Nova & Glance)', },
     'tempest.scenario.test_server_advanced_ops': {'level': 2, 'feature': 'Resize & Suspend (Nova)'},
     'tempest.scenario.test_minimum_basic': {'level': 2, 'feature': 'Minimum Scenario (Nova, Glance, Conder)', },
