@@ -196,14 +196,6 @@ class UtilTest(unittest.TestCase):
         nova.assert_called_with("user", "password",
         "tenant_name", "url")
 
-    @mock.patch('keystoneclient.generic.client.Client')
-    def test_get_keystone_client_v2(self, keystone):
-        keystone.return_value = KeystoneDummy()
-
-        client, url = utils.get_keystone_client('http://127.0.0.1:5000')
-        self.assertEqual(client, keystoneclient.v2_0.client.Client)
-        self.assertEqual(url, 'http://127.0.0.1:5000/v2')
-
     def test_get_smallest_image(self):
         class DummyImage(object):
             def __init__(self, size, disk_format, status):
@@ -220,18 +212,14 @@ class UtilTest(unittest.TestCase):
         smallest_image = utils.get_smallest_image(images)
         self.assertEqual(smallest_image.size, 2)
    
-    @mock.patch('tempest_report.utils.get_keystone_client')
     @mock.patch('tempest_report.utils.get_tenants')
     @mock.patch('tempest_report.utils.get_services')
     @mock.patch('tempest_report.utils.get_flavors')
     @mock.patch('tempest_report.utils.get_images')
     @mock.patch('tempest_report.utils.write_conf')
     def test_customized_tempest_conf(self,
-        get_keystone_client, get_tenants, get_services,
+        get_tenants, get_services,
         get_flavors, get_images, write_conf):
-        
-        tempest_report.utils.get_keystone_client.return_value = (
-            None, 'keystone_url')
         
         class ObjDummy(object):
             pass
@@ -262,7 +250,7 @@ class UtilTest(unittest.TestCase):
             "http://keystone_url")
 
         tempest_report.utils.write_conf.assert_called_with(
-            'user', 'password', 'keystone_url', 
+            'user', 'password', 'http://keystone_url', 
             'tenant_name', 23, 42, {'image': 'url'}, None)
 
     def test_write_conf(self):

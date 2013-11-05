@@ -130,17 +130,6 @@ def get_smallest_flavor(flavors):
     return smallest_flavor
 
 
-def get_keystone_client(keystone_url):
-    """ Tries to discover keystone and returns v2 client """
-    root = keystoneclient.generic.client.Client()
-    versions = root.discover(keystone_url)
-    if versions:
-        keystone_url = versions.get('v2.0', {}).get('url')
-        if keystone_url:
-            return (keystoneclient.v2_0.client.Client, keystone_url)
-    raise Exception("Keystone not found.")
-
-
 def get_tenants(user, password, keystone_url, keystone_client):
     """ Authenticate user and return list of tenants """
     keystone = keystone_client(username=user,
@@ -201,7 +190,7 @@ def get_smallest_image(images):
 
 
 def customized_tempest_conf(user, password, keystone_url, tenant_name=None):
-    keystone_client, keystone_url = get_keystone_client(keystone_url)
+    keystone_client = keystoneclient.v2_0.client.Client
     tenants, token = get_tenants(user, password, keystone_url, keystone_client)
 
     if tenant_name is None:
