@@ -296,7 +296,7 @@ def worker(queue, successful_tests, successful_subtests, verbose=False):
 
         logger.debug(output)
 
-        if success:
+        if success and "SKIP" not in output:
             successful_tests.append(testname)
             msg = "OK:  %s" % testname
         else:
