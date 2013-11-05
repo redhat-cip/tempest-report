@@ -86,8 +86,8 @@ class UtilTest(unittest.TestCase):
 
     @mock.patch('keystoneclient.v2_0.client')
     def test_get_services(self, keystone):
-        services, scoped_token = utils.get_services("tenant_name",
-            "token_id", "http://127.0.0.1:5000", KeystoneDummy)
+        services, scoped_token = utils.get_services("user",
+            "password", "tenant_name", "http://127.0.0.1:5000", KeystoneDummy)
 
         self.assertEqual(services, {'servicetype': 'url'})
         self.assertEqual(scoped_token, {'id': 'token'})

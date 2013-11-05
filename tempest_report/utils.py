@@ -140,11 +140,12 @@ def get_tenants(user, password, keystone_url, keystone_client):
             keystone.auth_ref['token']['id'])
 
 
-def get_services(tenant_name, token_id, keystone_url, keystone_client):
+def get_services(user, password, tenant_name, keystone_url, keystone_client):
     """ Returns list of services and a scoped token """
 
     keystone = keystone_client(auth_url=keystone_url,
-                               token=token_id,
+                               username=user,
+                               password=password,
                                tenant_name=tenant_name)
 
     # Create a dict of servicetype: endpoints
@@ -199,7 +200,7 @@ def customized_tempest_conf(user, password, keystone_url, tenant_name=None):
             print "Please set other tenant on command line if required. "
         tenant_name = tenants[0].name
 
-    services, _scoped_token = get_services(tenant_name, token, keystone_url, keystone_client)
+    services, _scoped_token = get_services(user, password, tenant_name, keystone_url, keystone_client)
 
     flavors = get_flavors(user, password, tenant_name, keystone_url)
     smallest_flavor = get_smallest_flavor(flavors)
