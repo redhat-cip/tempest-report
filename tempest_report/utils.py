@@ -37,6 +37,7 @@ import keystoneclient.v2_0
 import glanceclient
 import neutronclient.common.clientmanager
 import novaclient.client
+import novaclient
 import tempest.config
 
 from tempest_report import settings
@@ -115,8 +116,10 @@ def get_flavors(user, password, tenant_name, url, version=2):
 
     client_class = novaclient.client.get_client_class(version)
     nova_client = client_class(user, password, tenant_name, url)
-    return nova_client.flavors.list()
-
+    try:
+        return nova_client.flavors.list()
+    except novaclient.exceptions.EndpointNotFound:
+        return None
 
 def get_smallest_flavor(flavors):
     """ Takes a list of flavors and returns smallest one """
@@ -202,21 +205,26 @@ def customized_tempest_conf(user, password, keystone_url, tenant_name=None):
 
     services, _scoped_token = get_services(user, password, tenant_name, keystone_url, keystone_client)
 
+    smallest_flavor_id = "" 
     flavors = get_flavors(user, password, tenant_name, keystone_url)
-    smallest_flavor = get_smallest_flavor(flavors)
+    if flavors:
+        smallest_flavor = get_smallest_flavor(flavors)
+        smallest_flavor_id = smallest_flavor.id
 
-    imageservice_url = services.get('image')
-    images = get_images(_scoped_token.get('id'), imageservice_url)
-    smallest_image = get_smallest_image(images)
-
+    smallest_image_id = ""
+    image_url = services.get('image')
+    if image_url:
+        images = get_images(_scoped_token.get('id'), image_url)
+        smallest_image = get_smallest_image(images)
+        smallest_image_id = smallest_image.id
+    
     try:
         network_id = get_external_network_id(keystone_url, user, password, tenant_name)
     except Exception as ex:
         network_id = 0
 
-    content = write_conf(user, password, keystone_url, tenant_name, smallest_image.id,
-               smallest_flavor.id, services, network_id)
-    
+    content = write_conf(user, password, keystone_url, tenant_name, smallest_image_id,
+                         smallest_flavor_id, services, network_id)
     return content
     
 
