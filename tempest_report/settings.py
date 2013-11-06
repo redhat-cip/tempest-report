@@ -211,6 +211,7 @@ description_list = {
     'keystone-extension-s3tokens': {'feature': 'OpenStack S3 API', 'dummy': True},
     'keystone-extension-OS-EC2': {'feature': 'OpenStack EC2 API', 'dummy': True},
     'keystone-extension-OS-KSCRUD': {'feature': 'OpenStack Keystone User CRUD', 'dummy': True},
+    'keystone-extension-OS-KSADM': {'feature': 'OpenStack Keystone Admin Extension API', 'dummy': True},
 
     # Level 2: Scenario tests
     'tempest.scenario.test_large_ops': {'level': 2, 'feature': 'Large Operation Scenario (Nova & Glance)', },
