@@ -93,7 +93,7 @@ class KeystoneExtensionTest(tempest.cli.ClientTestBase):
     def test_keystone_admin(self):
         extensions = []
         try:
-            url = self.config.identity.uri + '/extensions/'
+            url = self.config.identity.uri + '/extensions'
             url = url.replace('5000', '35357')
             r = requests.get(url)
             data = json.loads(r.text)
@@ -109,7 +109,7 @@ class KeystoneExtensionTest(tempest.cli.ClientTestBase):
     def test_keystone_user(self):
         extensions = []
         try:
-            r = requests.get(self.config.identity.uri + '/extensions/')
+            r = requests.get(self.config.identity.uri + '/extensions')
             data = json.loads(r.text)
             extensions = data['extensions']['values']
         except Exception:
