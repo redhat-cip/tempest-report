@@ -91,31 +91,19 @@ class CeilometerTest(tempest.cli.ClientTestBase):
 
 class KeystoneExtensionTest(tempest.cli.ClientTestBase):
     def test_keystone_admin(self):
-        extensions = []
-        try:
-            url = self.config.identity.uri + '/extensions'
-            url = url.replace('5000', '35357')
-            r = requests.get(url)
-            data = json.loads(r.text)
-            extensions = data['extensions']['values']
-        except Exception:
-            pass
-        for ext in extensions:
+        url = self.config.identity.uri + '/extensions'
+        url = url.replace('5000', '35357')
+        r = requests.get(url)
+        data = json.loads(r.text)
+        for ext in data['extensions']['values']:
             alias = ext.get('alias')
             if alias:
                 print "keystone-extension-%s ... ok" % alias
-        self.assertTrue(extensions)
 
     def test_keystone_user(self):
-        extensions = []
-        try:
-            r = requests.get(self.config.identity.uri + '/extensions')
-            data = json.loads(r.text)
-            extensions = data['extensions']['values']
-        except Exception:
-            pass
-        for ext in extensions:
+        r = requests.get(self.config.identity.uri + '/extensions')
+        data = json.loads(r.text)
+        for ext in data['extensions']['values']:
             alias = ext.get('alias')
             if alias:
                 print "keystone-extension-%s ... ok" % alias
-        self.assertTrue(extensions)
