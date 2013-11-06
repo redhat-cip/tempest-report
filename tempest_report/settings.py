@@ -63,7 +63,7 @@ description_list = {
     'tempest_report.tempest_addons:CinderExtensionTest': {},
     'tempest_report.tempest_addons:NeutronExtensionTest': {},
     'tempest_report.tempest_addons:CeilometerTest': {},
-    'tempest_report.tempest_addons:KeystoneTest': {},
+    'tempest_report.tempest_addons:KeystoneExtensionTest': {},
     
     # Horizon login - quick scenario (login)
     'tempest.scenario.test_dashboard_basic_ops': {'feature': 'Login'},

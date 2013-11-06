@@ -89,7 +89,7 @@ class CeilometerTest(tempest.cli.ClientTestBase):
             print "ceilometer-meter-%s ... ok" % meter.name
         self.assertTrue(ceilo)
 
-class KeystoneTest(tempest.cli.ClientTestBase):
+class KeystoneExtensionTest(tempest.cli.ClientTestBase):
     def test_keystone_admin(self):
         extensions = []
         try:
