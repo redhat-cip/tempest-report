@@ -42,6 +42,7 @@ import threading
 import time
 import urlparse
 
+from keystoneclient.v2_0.client import Client
 import keystoneclient
 import glanceclient
 import neutronclient.common.clientmanager
