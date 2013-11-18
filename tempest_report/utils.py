@@ -163,11 +163,11 @@ def create_tenant_and_user(username, password, auth_url, tenant_name):
             'user_id': user.id}
 
 
-def delete_tenant_and_user(options, user):
-    keystone = keystone_client(username=options.os_username,
-                               password=options.os_password,
-                               auth_url=options.os_auth_url,
-                               tenant_name=options.os_tenant_name)
+def delete_tenant_and_user(username, password, auth_url, tenant_name, user):
+    keystone = keystone_client(username=username,
+                               password=password,
+                               auth_url=auth_url,
+                               tenant_name=tenant_name)
     keystone.users.delete(user['user_id'])
     keystone.tenants.delete(user['tenant_id'])
 
@@ -495,8 +495,16 @@ def main(options):
 
     os.remove(configfile.name)
     if options.is_admin:
-        delete_tenant_and_user(options, users['first_user'])
-        delete_tenant_and_user(options, users['second_user'])
+        delete_tenant_and_user(options.os_username,
+                               options.os_password,
+                               options.os_auth_url,
+                               tenant_name,
+                               users['first_user'])
+        delete_tenant_and_user(options.os_username,
+                               options.os_password,
+                               options.os_auth_url,
+                               tenant_name,
+                               users['second_user'])
 
     failed_tests = '\n'.join(sorted(
         [t for t in all_tests if t not in successful_tests]))
