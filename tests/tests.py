@@ -246,6 +246,7 @@ class UtilTest(unittest.TestCase):
         self.assertTrue(keystone().tenants.create.called)
         self.assertTrue(keystone().users.create.called)
 
+    @mock.patch('keystoneclient.v2_0.client.Client')
     @mock.patch('tempest_report.utils.get_tenants')
     @mock.patch('tempest_report.utils.get_services')
     @mock.patch('tempest_report.utils.get_flavors')
@@ -254,7 +255,8 @@ class UtilTest(unittest.TestCase):
                                      get_tenants,
                                      get_services,
                                      get_flavors,
-                                     get_images):
+                                     get_images,
+                                     keystone):
 
         class ObjDummy(object):
             pass

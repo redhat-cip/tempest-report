@@ -42,7 +42,6 @@ import threading
 import time
 import urlparse
 
-from keystoneclient.v2_0.client import Client as keystone_client
 import keystoneclient
 import glanceclient
 import neutronclient.common.clientmanager
@@ -164,10 +163,10 @@ def create_tenant_and_user(username, password, auth_url, tenant_name):
 
 
 def delete_tenant_and_user(username, password, auth_url, tenant_name, user):
-    keystone = keystone_client(username=username,
-                               password=password,
-                               auth_url=auth_url,
-                               tenant_name=tenant_name)
+    keystone = keystoneclient.v2_0.client.Client(username=username,
+                                                 password=password,
+                                                 auth_url=auth_url,
+                                                 tenant_name=tenant_name)
     keystone.users.delete(user['user_id'])
     keystone.tenants.delete(user['tenant_id'])
 
