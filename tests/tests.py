@@ -46,6 +46,12 @@ class DummyFileObject(object):
 class Tenant(object):
     def __init__(self):
         self.name = "Tenant Name"
+        self.id = "tenant_id"
+
+
+class User(object):
+    def __init__(self):
+        self.id = "user_id"
 
 
 class KeystoneDummy(object):
@@ -54,19 +60,25 @@ class KeystoneDummy(object):
             tenant = Tenant()
             return [tenant]
 
+        def create(self, *_args, **_kwargs):
+            return Tenant()
+
+    class Users(object):
+        def create(self, *_args, **_kwargs):
+            return Tenant()
+
     def __init__(self, *_args, **_kwargs):
-        self.auth_ref = {'token': {'id': 'token'}, 
+        self.auth_ref = {'token': {'id': 'token'},
                          'serviceCatalog': [{
                              'type': 'servicetype',
                              'endpoints': [{
-                                 'publicURL': 'url'
-                            }],
-                        }]}
+                                 'publicURL': 'url'}]}]}
         self.tenants = self.Tenants()
+        self.users = self.Users()
 
     def discover(self, _url):
         return {'v2.0': {'url': 'http://127.0.0.1:5000/v2'}}
- 
+
 
 class UtilTest(unittest.TestCase):
     def test_get_smallest_flavor(self):
@@ -86,17 +98,21 @@ class UtilTest(unittest.TestCase):
 
     @mock.patch('keystoneclient.v2_0.client')
     def test_get_services(self, keystone):
+        keystone.Client = KeystoneDummy
         services, scoped_token = utils.get_services("user",
-            "password", "tenant_name", "http://127.0.0.1:5000", KeystoneDummy)
+                                                    "password",
+                                                    "tenant_name",
+                                                    "http://127.0.0.1:5000")
 
         self.assertEqual(services, {'servicetype': 'url'})
         self.assertEqual(scoped_token, {'id': 'token'})
 
     @mock.patch('keystoneclient.v2_0.client')
     def test_get_tenants(self, keystone):
+        keystone.Client = KeystoneDummy
         tenants, token = utils.get_tenants("user",
-                "password", "http://127.0.0.1:5000", KeystoneDummy)
-
+                                           "password",
+                                           "http://127.0.0.1:5000")
         self.assertTrue(isinstance(tenants[0], Tenant))
         self.assertEqual(token, 'token')
 
@@ -105,28 +121,28 @@ class UtilTest(unittest.TestCase):
         subprocess_mock.return_value = "output"
         success, output = utils.executer(
             "testname", "/dir/filename")
-    
+
         self.assertTrue(success)
         self.assertEqual(output, "output")
-    
+
         subprocess_mock.assert_called_with(
             ["nosetests", "-v", "-s", "testname"],
             stderr=subprocess.STDOUT)
-        
+
         subprocess_mock.side_effect = subprocess.CalledProcessError(
             1, "command", "error")
         success, output = utils.executer(
             "testname", "filename")
-    
+
         self.assertFalse(success)
         self.assertEqual(output, "error")
 
     def test_summary(self):
         dscr = {
-            'tempest.api.compute' : {'service': 'Compute (Nova)',
-                        'feature': '1',
-                        'release': 5},
-            }
+            'tempest.api.compute': {'service': 'Compute (Nova)',
+                                    'feature': '1',
+                                    'release': 5},
+        }
 
         with mock.patch.dict(settings.description_list, dscr):
             successful_tests = ['tempest.api.compute']
@@ -139,7 +155,7 @@ class UtilTest(unittest.TestCase):
     def test_summary_class(self):
         summary = utils.ServiceSummary('servicename')
         self.assertEqual(summary.release_name, '')
-        
+
         summary.set_release(5)
         self.assertEqual(summary.release_name, 'Essex (or later)')
 
@@ -161,25 +177,27 @@ class UtilTest(unittest.TestCase):
         images = DummyImages()
         glance.return_value.images = images
 
-        retval = utils.get_images("token_id", "http://url:5000/v2")
+        services = {'image': 'http://url:5000'}
+        token = {'id': 'token_id'}
+
+        retval = utils.get_images(services, token)
         self.assertEqual(retval, ['first image'])
 
-        glance.assert_called_with(2, "http://url:5000", 
-        token="token_id")
+        glance.assert_called_with(2, "http://url:5000", token="token_id")
 
         self.raised = False
+
         def side_effect(*args, **kwargs):
             if not self.raised:
                 self.raised = True
                 raise glanceclient.exc.HTTPNotFound()
             return glance
- 
-        glance.side_effect = side_effect
- 
-        utils.get_images("token_id", "http://url:5000/v2")
 
-        glance.assert_called_with(1, "http://url:5000",
-        token="token_id")
+        glance.side_effect = side_effect
+
+        utils.get_images(services, token)
+
+        glance.assert_called_with(1, "http://url:5000", token="token_id")
 
     @mock.patch('novaclient.v1_1.client.Client')
     def test_get_flavors(self, nova):
@@ -190,11 +208,11 @@ class UtilTest(unittest.TestCase):
         flavors = DummyFlavors()
         nova.return_value.flavors = flavors
         retval = utils.get_flavors("user", "password",
-            "tenant_name", "url")
+                                   "tenant_name", "url")
         self.assertEqual(retval, ['flavor'])
 
         nova.assert_called_with("user", "password",
-        "tenant_name", "url")
+                                "tenant_name", "url")
 
     def test_get_smallest_image(self):
         class DummyImage(object):
@@ -211,27 +229,46 @@ class UtilTest(unittest.TestCase):
 
         smallest_image = utils.get_smallest_image(images)
         self.assertEqual(smallest_image.size, 2)
-   
+
+    @mock.patch('keystoneclient.v2_0.client.Client')
+    def test_create_tenant_and_user(self, keystone):
+        utils.create_tenant_and_user("keystone_username",
+                                     "keystone_password",
+                                     "http://keystone_url",
+                                     "tenant_name")
+
+        keystone.assert_called_with(
+            username='keystone_username',
+            tenant_name='tenant_name',
+            password='keystone_password',
+            auth_url='http://keystone_url')
+
+        self.assertTrue(keystone().tenants.create.called)
+        self.assertTrue(keystone().users.create.called)
+
     @mock.patch('tempest_report.utils.get_tenants')
     @mock.patch('tempest_report.utils.get_services')
     @mock.patch('tempest_report.utils.get_flavors')
     @mock.patch('tempest_report.utils.get_images')
-    @mock.patch('tempest_report.utils.write_conf')
     def test_customized_tempest_conf(self,
-        get_tenants, get_services,
-        get_flavors, get_images, write_conf):
-        
+                                     get_tenants,
+                                     get_services,
+                                     get_flavors,
+                                     get_images):
+
         class ObjDummy(object):
             pass
-        
+
         tenant = ObjDummy()
         tenant.name = "tenant_name"
         tempest_report.utils.get_tenants.return_value = (
             [tenant], None)
-       
+
         image = ObjDummy()
         image.size = 1
-        image.id = 23
+        image.id = "23"
+        image.disk_format = "ami"
+        image.status = "active"
         tempest_report.utils.get_images.return_value = (
             [image])
 
@@ -239,36 +276,35 @@ class UtilTest(unittest.TestCase):
         flavor.vcpus = 1
         flavor.disk = 1
         flavor.ram = 1
-        flavor.id = 42
+        flavor.id = "42"
         tempest_report.utils.get_flavors.return_value = (
             [flavor])
 
         tempest_report.utils.get_services.return_value = (
             {'image': 'url'}, {'id': 'id'})
 
-        utils.customized_tempest_conf("user", "password",
-            "http://keystone_url")
+        users = {'admin_user': {'username': 'user',
+                                'password': 'password',
+                                'tenant_name': 'tenant_name'},
+                 'first_user': {'username': 'user',
+                                'password': 'password',
+                                'tenant_name': 'tenant_name'},
+                 'second_user': {'username': 'user',
+                                 'password': 'password',
+                                 'tenant_name': 'tenant_name'}}
 
-        tempest_report.utils.write_conf.assert_called_with(
-            'user', 'password', 'http://keystone_url', 
-            'tenant_name', 23, 42, {'image': 'url'}, None)
+        content = utils.customized_tempest_conf(users, "http://keystone_url")
 
-    def test_write_conf(self):
-
-        content = utils.write_conf("user", "password", "keystone_url", "tenant",
-                         "image_id", "flavor_id", {'compute': 'url'},
-                         'network-id')
-        
         self.assertIn("[DEFAULT]", content)
         self.assertIn("use_stderr = False", content)
         self.assertIn("log_file = tempest.log", content)
         self.assertIn("[stress]", content)
         self.assertIn("[compute]", content)
-        self.assertIn("image_ref = image_id", content)
-        self.assertIn("image_ref_alt = image_id", content)
+        self.assertIn("image_ref = 23", content)
+        self.assertIn("image_ref_alt = 23", content)
         self.assertIn("allow_tenant_isolation = False", content)
-        self.assertIn("flavor_ref = flavor_id", content)
-        self.assertIn("flavor_ref_alt = flavor_id", content)
+        self.assertIn("flavor_ref = 42", content)
+        self.assertIn("flavor_ref_alt = 42", content)
         self.assertIn("[network]", content)
         self.assertIn("[boto]", content)
         self.assertIn("[scenario]", content)
@@ -282,12 +318,12 @@ class UtilTest(unittest.TestCase):
         self.assertIn("[images]", content)
         self.assertIn("[service_available]", content)
         self.assertIn("cinder = False", content)
-        self.assertIn("glance = False", content)
+        self.assertIn("glance = True", content)
         self.assertIn("swift = False", content)
-        self.assertIn("nova = True", content)
+        self.assertIn("nova = False", content)
         self.assertIn("neutron = False", content)
         self.assertIn("[identity]", content)
-        self.assertIn("uri = keystone_url", content)
+        #self.assertIn("uri = keystone_url", content)
         self.assertIn("username = user", content)
         self.assertIn("alt_username = user", content)
         self.assertIn("admin_username = user", content)
@@ -303,9 +339,10 @@ class UtilTest(unittest.TestCase):
     @mock.patch('Queue.Queue')
     @mock.patch('tempest_report.utils.executer')
     def test_worker(self, executer, queue, logger):
-       
+
         # Run once in test, than return Exception
         self.executed = False
+
         def side_effect(*args, **kwargs):
             if not self.executed:
                 self.executed = True
@@ -315,7 +352,7 @@ class UtilTest(unittest.TestCase):
         successful_tests = []
         successful_subtests = []
         tempest_report.utils.executer.return_value = (True, "")
-        queue.get_nowait.side_effect = side_effect 
+        queue.get_nowait.side_effect = side_effect
         utils.worker(queue, successful_tests, successful_subtests)
 
         queue.get_nowait.assert_called_with()
@@ -328,14 +365,14 @@ class UtilTest(unittest.TestCase):
     @mock.patch('tempest_report.utils.customized_tempest_conf')
     @mock.patch('threading.Thread')
     @mock.patch('tempest_report.utils.logging')
-    def test_main(self, logger, thread, customized_conf, remove):
-        
+    def est_main(self, logger, thread, customized_conf, remove):
+
         options = lambda: object
         options.os_username = "username"
         options.os_password = "password"
         options.os_auth_url = "auth_url"
         options.os_tenant_name = "tenant_name"
-        options.fullrun = False 
+        options.fullrun = False
         options.level = 1
         options.max_release_level = 10
         options.verbose = False
@@ -345,10 +382,11 @@ class UtilTest(unittest.TestCase):
         customized_conf.return_value = "dummy_content"
         with mock.patch(
             'tempest_report.settings.description_list',
-            {'testname': {}}):
-            utils.main(options)
+                {'testname': {}}):
+
+                utils.main(options)
 
         logger.getLogger().info.assert_any_call(
             '\nFailed tests:\ntestname')
-        
+
         self.assertTrue(remove.called)

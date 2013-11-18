@@ -32,6 +32,7 @@ usage: %%prog [--level <detail level>]
              [--os-tenant-name <auth-tenant-name>]
              [--release <release level>]
              [--full-run]
+             [--admin]
 
 Command-line interface for OpenStack Tempest.
 
@@ -66,6 +67,8 @@ Examples:
                            '(Folsom: 6, Grizzly: 7, Havana: 8 and so on)')
     parser.add_option("-f", '--full-run', action="store_true", dest="fullrun",
                       default=False, help='Run all tempest tests')
+    parser.add_option("-a", '--admin', action="store_true", dest="is_admin",
+                      default=False, help='User has admin permissions')
 
     (options, args) = parser.parse_args()
 
