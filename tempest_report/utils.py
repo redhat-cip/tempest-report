@@ -113,6 +113,7 @@ def get_smallest_image(images):
     for img in images:
         if (img.size < size and
             img.disk_format in ['qcow2', 'ami'] and
+            img.visibility == 'public' and
                 img.status == 'active'):
             size = img.size
             smallest_image = img

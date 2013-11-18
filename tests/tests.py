@@ -43,9 +43,26 @@ class DummyFileObject(object):
         self.content += content
 
 
+class DummyImage(object):
+    def __init__(self, size, disk_format, status, visibility='public'):
+        self.size = size
+        self.disk_format = disk_format
+        self.status = status
+        self.id = "23"
+        self.visibility = visibility
+
+
+class DummyFlavor(object):
+    def __init__(self, vcpus, disk, ram):
+        self.vcpus = vcpus
+        self.disk = disk
+        self.ram = ram
+        self.id = "42"
+
+
 class Tenant(object):
-    def __init__(self):
-        self.name = "Tenant Name"
+    def __init__(self, name="Tenant Name"):
+        self.name = name
         self.id = "tenant_id"
 
 
@@ -82,12 +99,6 @@ class KeystoneDummy(object):
 
 class UtilTest(unittest.TestCase):
     def test_get_smallest_flavor(self):
-        class DummyFlavor(object):
-            def __init__(self, vcpus, disk, ram):
-                self.vcpus = vcpus
-                self.disk = disk
-                self.ram = ram
-
         sample_flavors = []
         sample_flavors.append(DummyFlavor(1, 1, 128))
         sample_flavors.append(DummyFlavor(1, 0, 64))
@@ -215,17 +226,12 @@ class UtilTest(unittest.TestCase):
                                 "tenant_name", "url")
 
     def test_get_smallest_image(self):
-        class DummyImage(object):
-            def __init__(self, size, disk_format, status):
-                self.size = size
-                self.disk_format = disk_format
-                self.status = status
-
         images = []
         images.append(DummyImage(10, 'qcow2', 'active'))
         images.append(DummyImage(2, 'qcow2', 'active'))
-        images.append(DummyImage(1, 'other', 'active'))
         images.append(DummyImage(1, 'qcow2', 'other'))
+        images.append(DummyImage(1, 'other', 'active'))
+        images.append(DummyImage(0, 'qcow2', 'active', 'private'))
 
         smallest_image = utils.get_smallest_image(images)
         self.assertEqual(smallest_image.size, 2)
@@ -258,29 +264,14 @@ class UtilTest(unittest.TestCase):
                                      get_images,
                                      keystone):
 
-        class ObjDummy(object):
-            pass
+        tenant = Tenant("tenant_name")
+        tempest_report.utils.get_tenants.return_value = ([tenant], None)
 
-        tenant = ObjDummy()
-        tenant.name = "tenant_name"
-        tempest_report.utils.get_tenants.return_value = (
-            [tenant], None)
+        image = DummyImage(1, 'ami', 'active')
+        tempest_report.utils.get_images.return_value = ([image])
 
-        image = ObjDummy()
-        image.size = 1
-        image.id = "23"
-        image.disk_format = "ami"
-        image.status = "active"
-        tempest_report.utils.get_images.return_value = (
-            [image])
-
-        flavor = ObjDummy()
-        flavor.vcpus = 1
-        flavor.disk = 1
-        flavor.ram = 1
-        flavor.id = "42"
-        tempest_report.utils.get_flavors.return_value = (
-            [flavor])
+        flavor = DummyFlavor(1, 1, 1)
+        tempest_report.utils.get_flavors.return_value = ([flavor])
 
         tempest_report.utils.get_services.return_value = (
             {'image': 'url'}, {'id': 'id'})
