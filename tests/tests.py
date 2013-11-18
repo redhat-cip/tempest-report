@@ -361,11 +361,12 @@ class UtilTest(unittest.TestCase):
         self.assertEqual(successful_tests, ["testname"])
         queue.task_done.assert_called_with()
 
+    @mock.patch('keystoneclient.v2_0.client')
     @mock.patch('os.remove')
     @mock.patch('tempest_report.utils.customized_tempest_conf')
     @mock.patch('threading.Thread')
     @mock.patch('tempest_report.utils.logging')
-    def est_main(self, logger, thread, customized_conf, remove):
+    def test_main(self, logger, thread, customized_conf, remove, keystone):
 
         options = lambda: object
         options.os_username = "username"
@@ -376,6 +377,7 @@ class UtilTest(unittest.TestCase):
         options.level = 1
         options.max_release_level = 10
         options.verbose = False
+        options.is_admin = False
 
         thread.return_value.isAlive = lambda: False
 
