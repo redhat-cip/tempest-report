@@ -151,11 +151,12 @@ def create_tenant_and_user(username, password, auth_url, tenant_name):
     username = ''.join(random.choice(string.letters) for x in range(10))
     tenant_name = ''.join(random.choice(string.letters) for x in range(10))
     password = ''.join(random.choice(string.letters) for x in range(10))
+    email = ''.join(random.choice(string.letters) for x in range(5)) + 'dummy@dummy.org'
 
     tenant = keystone.tenants.create(tenant_name=tenant_name,
                                      description="Tenant for tempest",
                                      enabled=True)
-    user = keystone.users.create(username, password, tenant.id)
+    user = keystone.users.create(username, password, email, tenant.id)
 
     return {'username': username,
             'password': password,
