@@ -85,9 +85,8 @@ def get_tenants(user, password, keystone_url):
                                                  password=password,
                                                  auth_url=keystone_url)
 
-    return (keystone.tenants.findall(),
-            keystone.auth_ref['token']['id'])
-
+    return keystone.tenants.findall()
+   
 
 def get_images(services, token):
     """ Returns list of available images. """
@@ -414,9 +413,9 @@ def main(options):
     logger.addHandler(console)
     logger.addHandler(logfile)
 
-    tenants, _token = get_tenants(options.os_username,
-                                  options.os_password,
-                                  options.os_auth_url)
+    tenants = get_tenants(options.os_username,
+                          options.os_password,
+                          options.os_auth_url)
 
     tenant_name = options.os_tenant_name
     if tenant_name is None:

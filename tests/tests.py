@@ -121,11 +121,10 @@ class UtilTest(unittest.TestCase):
     @mock.patch('keystoneclient.v2_0.client')
     def test_get_tenants(self, keystone):
         keystone.Client = KeystoneDummy
-        tenants, token = utils.get_tenants("user",
-                                           "password",
-                                           "http://127.0.0.1:5000")
+        tenants = utils.get_tenants("user",
+                                    "password",
+                                    "http://127.0.0.1:5000")
         self.assertTrue(isinstance(tenants[0], Tenant))
-        self.assertEqual(token, 'token')
 
     @mock.patch('subprocess.check_output')
     def test_executer(self, subprocess_mock):
@@ -265,7 +264,7 @@ class UtilTest(unittest.TestCase):
                                      keystone):
 
         tenant = Tenant("tenant_name")
-        tempest_report.utils.get_tenants.return_value = ([tenant], None)
+        tempest_report.utils.get_tenants.return_value = [tenant]
 
         image = DummyImage(1, 'ami', 'active')
         tempest_report.utils.get_images.return_value = ([image])
