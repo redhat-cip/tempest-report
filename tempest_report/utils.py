@@ -110,12 +110,19 @@ def get_smallest_image(images):
     smallest_image = None
 
     for img in images:
+        public = False
         if (img.size < size and
             img.disk_format in ['qcow2', 'ami'] and
-            img.visibility == 'public' and
                 img.status == 'active'):
-            size = img.size
-            smallest_image = img
+            if hasattr(img, 'visibility'):
+                if img.visibility == 'public':
+                    public = True
+            if hasattr(img, 'is_public'):
+                if img.is_public == True:
+                    public = True
+            if public:
+                size = img.size
+                smallest_image = img
     return smallest_image
 
 
