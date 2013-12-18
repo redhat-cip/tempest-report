@@ -233,13 +233,13 @@ def customized_tempest_conf(users, keystone_url):
     tempest_config.set('identity', 'admin_password',
                        users['admin_user']['password'])
 
-    tempest_config.set('identity', 'tenant_name',
+    tempest_config.set('identity', 'tenant_name', '"%s"' %
                        users['first_user']['tenant_name'])
-    tempest_config.set('identity', 'alt_tenant_name',
+    tempest_config.set('identity', 'alt_tenant_name', '"%s"' %
                        users['second_user']['tenant_name'])
-    tempest_config.set('identity', 'admin_tenant_name',
+    tempest_config.set('identity', 'admin_tenant_name', '"%s"' %
                        users['admin_user']['tenant_name'])
-    tempest_config.set('identity', 'admin_role',
+    tempest_config.set('identity', 'admin_role', '"%s"' %
                        users['admin_user']['tenant_name'])
 
     tempest_config.set('object_storage', 'operator_role',
