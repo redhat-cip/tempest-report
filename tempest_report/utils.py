@@ -103,6 +103,15 @@ def get_images(services, token):
     return None
 
 
+def get_images_from_nova(user, password, tenant_name, url, version=2):
+    client_class = novaclient.client.get_client_class(version)
+    nova_client = client_class(user, password, tenant_name, url)
+    try:
+        return nova_client.images.list()
+    except novaclient.exceptions.EndpointNotFound:
+        return None
+
+
 def get_smallest_image(images):
     """ Returns the smallest active image from an image list """
 
