@@ -18,6 +18,7 @@ import json
 import re
 import requests
 
+from keystoneclient.generic import client
 import ceilometerclient.client
 import tempest.api.image.base
 import tempest.api.compute.base
@@ -90,20 +91,17 @@ class CeilometerTest(tempest.cli.ClientTestBase):
         self.assertTrue(ceilo)
 
 class KeystoneExtensionTest(tempest.cli.ClientTestBase):
+    def _get_extensions(self, url):
+        print url
+        root = client.Client(url)
+        extensions = root.discover_extensions(url)
+        for key, value in extensions.items():
+            print "keystone-extension-%s ... ok" % key
+
     def test_keystone_admin(self):
         url = self.config.identity.uri + '/extensions'
         url = url.replace('5000', '35357')
-        r = requests.get(url)
-        data = json.loads(r.text)
-        for ext in data['extensions']['values']:
-            alias = ext.get('alias')
-            if alias:
-                print "keystone-extension-%s ... ok" % alias
+        self._get_extensions(url)
 
     def test_keystone_user(self):
-        r = requests.get(self.config.identity.uri + '/extensions')
-        data = json.loads(r.text)
-        for ext in data['extensions']['values']:
-            alias = ext.get('alias')
-            if alias:
-                print "keystone-extension-%s ... ok" % alias
+        self._get_extensions(self.config.identity.uri)
