@@ -92,11 +92,11 @@ class CeilometerTest(tempest.cli.ClientTestBase):
 
 class KeystoneExtensionTest(tempest.cli.ClientTestBase):
     def _get_extensions(self, url):
-        print url
         root = client.Client(url)
         extensions = root.discover_extensions(url)
-        for key, value in extensions.items():
-            print "keystone-extension-%s ... ok" % key
+        if extensions:
+            for key, value in extensions.items():
+                print "keystone-extension-%s ... ok" % key
 
     def test_keystone_admin(self):
         url = self.config.identity.uri + '/extensions'
