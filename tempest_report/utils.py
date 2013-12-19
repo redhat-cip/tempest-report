@@ -257,10 +257,10 @@ def customized_tempest_conf(users, keystone_url, image_id=None):
     tempest_config.set('object_storage', 'operator_role',
                        users['admin_user']['tenant_name'])
 
-    tempest_config.set('compute', 'image_ref', smallest_image_id)
-    tempest_config.set('compute', 'image_ref_alt', smallest_image_id)
-    tempest_config.set('compute', 'flavor_ref', smallest_flavor_id)
-    tempest_config.set('compute', 'flavor_ref_alt', smallest_flavor_id)
+    tempest_config.set('compute', 'image_ref', str(smallest_image_id))
+    tempest_config.set('compute', 'image_ref_alt', str(smallest_image_id))
+    tempest_config.set('compute', 'flavor_ref', str(smallest_flavor_id))
+    tempest_config.set('compute', 'flavor_ref_alt', str(smallest_flavor_id))
 
     if users['first_user'] != users['second_user']:
         tempest_config.set('compute', 'allow_tenant_isolation', "True")
