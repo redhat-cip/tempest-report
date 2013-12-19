@@ -189,7 +189,7 @@ def delete_tenant_and_user(username, password, auth_url, tenant_name, user):
     keystone.tenants.delete(user['tenant_id'])
 
 
-def customized_tempest_conf(users, keystone_url):
+def customized_tempest_conf(users, keystone_url, image_id=None):
     user = users['admin_user']['username']
     password = users['admin_user']['password']
     tenant_name = users['admin_user']['tenant_name']
@@ -203,12 +203,15 @@ def customized_tempest_conf(users, keystone_url):
         smallest_flavor = get_smallest_flavor(flavors)
         smallest_flavor_id = smallest_flavor.id
 
-    smallest_image_id = ""
-    images = get_images(services, token)
-    if images:
-        smallest_image = get_smallest_image(images)
-        smallest_image_id = smallest_image.id
-
+    if not image_id:
+        smallest_image_id = ""
+        images = get_images(services, token)
+        if images:
+            smallest_image = get_smallest_image(images)
+            smallest_image_id = smallest_image.id
+    else:
+        smallest_image_id = image_id
+    
     try:
         network_id = get_external_network_id(keystone_url, user,
                                              password, tenant_name)
