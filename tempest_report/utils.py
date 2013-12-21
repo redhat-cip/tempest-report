@@ -56,11 +56,11 @@ from tempest_report import settings
 # smallest img, services and generating the tempest.conf file
 
 
-def get_flavors(user, password, tenant_name, url, version=2):
+def get_flavors(user, password, tenant_name, url, version=2, region_name=None):
     """ Returns list of available flavors """
 
     client_class = novaclient.client.get_client_class(version)
-    nova_client = client_class(user, password, tenant_name, url)
+    nova_client = client_class(user, password, tenant_name, url, region_name=region_name)
     try:
         return nova_client.flavors.list()
     except novaclient.exceptions.EndpointNotFound:
@@ -189,7 +189,7 @@ def delete_tenant_and_user(username, password, auth_url, tenant_name, user):
     keystone.tenants.delete(user['tenant_id'])
 
 
-def customized_tempest_conf(users, keystone_url, image_id=None):
+def customized_tempest_conf(users, keystone_url, image_id=None, region_name=None):
     user = users['admin_user']['username']
     password = users['admin_user']['password']
     tenant_name = users['admin_user']['tenant_name']
@@ -198,7 +198,7 @@ def customized_tempest_conf(users, keystone_url, image_id=None):
     services, token = get_services(user, password, tenant_name, keystone_url)
 
     smallest_flavor_id = ""
-    flavors = get_flavors(user, password, tenant_name, keystone_url)
+    flavors = get_flavors(user, password, tenant_name, keystone_url, region_name=region_name)
     if flavors:
         smallest_flavor = get_smallest_flavor(flavors)
         smallest_flavor_id = smallest_flavor.id
@@ -253,6 +253,10 @@ def customized_tempest_conf(users, keystone_url, image_id=None):
                        users['admin_user']['tenant_name'])
     tempest_config.set('identity', 'admin_role', '"%s"' %
                        users['admin_user']['tenant_name'])
+
+    if region_name:
+        tempest_config.set('identity', 'region', region_name)
+        tempest_config.set('compute', 'region', region_name)
 
     tempest_config.set('object_storage', 'operator_role',
                        users['admin_user']['tenant_name'])
