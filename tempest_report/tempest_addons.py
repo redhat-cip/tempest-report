@@ -55,6 +55,9 @@ class NovaExtensionTest(BaseComputeTest):
             print "nova-extension-%s ... ok" % ext.get('alias')
         self.assertTrue(ext)
 
+    def tearDown(self):
+        self.clear_servers()
+
 
 class CinderExtensionTest(tempest.cli.ClientTestBase):
     def test_extensions(self):
