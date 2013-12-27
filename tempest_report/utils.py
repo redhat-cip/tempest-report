@@ -189,7 +189,7 @@ def delete_tenant_and_user(username, password, auth_url, tenant_name, user):
     keystone.tenants.delete(user['tenant_id'])
 
 
-def customized_tempest_conf(users, keystone_url, image_id=None, region_name=None):
+def customized_tempest_conf(users, keystone_url, image_id=None, region_name=None, flavor_id=None):
     user = users['admin_user']['username']
     password = users['admin_user']['password']
     tenant_name = users['admin_user']['tenant_name']
@@ -197,11 +197,14 @@ def customized_tempest_conf(users, keystone_url, image_id=None, region_name=None
     # Detect settings
     services, token = get_services(user, password, tenant_name, keystone_url)
 
-    smallest_flavor_id = ""
-    flavors = get_flavors(user, password, tenant_name, keystone_url, region_name=region_name)
-    if flavors:
-        smallest_flavor = get_smallest_flavor(flavors)
-        smallest_flavor_id = smallest_flavor.id
+    if not flavor_id:
+        smallest_flavor_id = ""
+        flavors = get_flavors(user, password, tenant_name, keystone_url, region_name=region_name)
+        if flavors:
+            smallest_flavor = get_smallest_flavor(flavors)
+            smallest_flavor_id = smallest_flavor.id
+    else:
+        smallest_flavor_id = flavor_id
 
     if not image_id:
         smallest_image_id = ""
