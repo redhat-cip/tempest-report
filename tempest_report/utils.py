@@ -222,7 +222,7 @@ def customized_tempest_conf(users, keystone_url, image_id=None, region_name=None
         network_id = 0
 
     # Create tempest config, add default sections
-    cfg = tempest.config.TempestConfig()
+    cfg = tempest.config.TempestConfigPrivate()
     tempest_config = ConfigParser.SafeConfigParser()
     for section, _settings in vars(cfg).items():
         if not tempest_config.has_section(section):
