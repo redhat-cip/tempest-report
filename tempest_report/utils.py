@@ -228,8 +228,8 @@ def customized_tempest_conf(users, keystone_url, image_id=None, region_name=None
         if not tempest_config.has_section(section):
             tempest_config.add_section(section)
 
-    tempest_config.set('DEFAULT', 'debug', 'True')
-    tempest_config.set('DEFAULT', 'use_stderr', 'True')
+    tempest_config.set('DEFAULT', 'debug', 'False')
+    tempest_config.set('DEFAULT', 'use_stderr', 'False')
     tempest_config.set('DEFAULT', 'log_file', 'tempest.log')
     tempest_config.set('DEFAULT', 'lock_path', '/tmp')
 
