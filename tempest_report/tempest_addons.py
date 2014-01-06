@@ -56,6 +56,7 @@ class NovaExtensionTest(BaseComputeTest):
         self.assertTrue(ext)
 
     def tearDown(self):
+        super(NovaExtensionTest, self).tearDown()
         self.clear_servers()
 
 
