@@ -258,6 +258,10 @@ def customized_tempest_conf(users, keystone_url, image_id=None, region_name=None
     tempest_config.set('identity', 'admin_role', '"%s"' %
                        users['admin_user']['tenant_name'])
 
+    tempest_config.add_section('identity-feature-enabled')
+    tempest_config.set('identity-feature-enabled', 'api_v3', 'False')
+    tempest_config.set('identity', 'uri_v3', '')
+
     if region_name:
         tempest_config.set('identity', 'region', region_name)
         tempest_config.set('compute', 'region', region_name)
