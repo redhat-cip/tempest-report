@@ -208,7 +208,12 @@ def customized_tempest_conf(users, keystone_url, image_id=None, region_name=None
 
     if not image_id:
         smallest_image_id = ""
-        images = get_images(services, token)
+        try:
+            images = get_images(services, token)
+        except Exception:
+            images = None
+            del services['compute']
+            del services['image']
         if images:
             smallest_image = get_smallest_image(images)
             smallest_image_id = smallest_image.id
