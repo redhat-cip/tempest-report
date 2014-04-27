@@ -14,8 +14,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-#pylint:disable=E1101
-
 """ This file is contains three sections:
 
     1. Methods to detect settings, for example smallest flavor, smallest img,
@@ -36,19 +34,16 @@ import string
 import StringIO
 import subprocess
 import sys
-import tempest
 import tempfile
 import threading
 import time
-import urlparse
 
 from keystoneclient.v2_0.client import Client
 import keystoneclient
-import glanceclient
 import neutronclient.common.clientmanager
 import novaclient.client
 import novaclient
-import tempest.config
+import tempest
 
 from tempest_report import settings
 
@@ -86,26 +81,11 @@ def get_tenants(user, password, keystone_url):
                                                  auth_url=keystone_url)
 
     return keystone.tenants.findall()
-   
-
-def get_images(services, token):
-    """ Returns list of available images. """
-
-    image_url = services.get('image')
-    if image_url:
-        parsed = urlparse.urlparse(image_url)
-        url = "%s://%s" % (parsed.scheme, parsed.netloc)
-        try:
-            glance = glanceclient.Client(2, url, token=token.get('id'))
-        except glanceclient.exc.HTTPNotFound:
-            glance = glanceclient.Client(1, url, token=token.get('id'))
-        return [img for img in glance.images.list()]
-    return None
 
 
-def get_images_from_nova(user, password, tenant_name, url, version=2):
+def get_images_from_nova(user, password, tenant_name, url, version=2, region_name=None):
     client_class = novaclient.client.get_client_class(version)
-    nova_client = client_class(user, password, tenant_name, url)
+    nova_client = client_class(user, password, tenant_name, url, region_name=region_name)
     try:
         return nova_client.images.list()
     except novaclient.exceptions.EndpointNotFound:
@@ -115,23 +95,14 @@ def get_images_from_nova(user, password, tenant_name, url, version=2):
 def get_smallest_image(images):
     """ Returns the smallest active image from an image list """
 
-    size = sys.maxint
+    min_size = sys.maxint
     smallest_image = None
 
     for img in images:
-        public = False
-        if (img.size < size and
-            img.disk_format in ['qcow2', 'ami'] and
-                img.status == 'active'):
-            if hasattr(img, 'visibility'):
-                if img.visibility == 'public':
-                    public = True
-            if hasattr(img, 'is_public'):
-                if img.is_public == True:
-                    public = True
-            if public:
-                size = img.size
-                smallest_image = img
+        size = img._info.get('OS-EXT-IMG-SIZE:size', sys.maxint)
+        if img.status == 'ACTIVE' and size < min_size:
+            min_size = size
+            smallest_image = img
     return smallest_image
 
 
@@ -189,6 +160,23 @@ def delete_tenant_and_user(username, password, auth_url, tenant_name, user):
     keystone.tenants.delete(user['tenant_id'])
 
 
+def get_services(user, password, tenant_name, keystone_url):
+    """ Returns list of services and a scoped token """
+    keystone = keystoneclient.v2_0.client.Client(auth_url=keystone_url,
+                                                 username=user,
+                                                 password=password,
+                                                 tenant_name=tenant_name)
+
+    # Create a dict of servicetype: endpoints
+    services = {}
+    for service in keystone.auth_ref['serviceCatalog']:
+        service_type = service['type']
+        endpoint = service['endpoints'][0]['publicURL']
+        if service_type not in services:
+            services[service_type] = endpoint
+    return (services, keystone.auth_ref['token'])
+
+
 def customized_tempest_conf(users, keystone_url, image_id=None, region_name=None, flavor_id=None):
     user = users['admin_user']['username']
     password = users['admin_user']['password']
@@ -209,17 +197,18 @@ def customized_tempest_conf(users, keystone_url, image_id=None, region_name=None
     if not image_id:
         smallest_image_id = ""
         try:
-            images = get_images(services, token)
+            images = get_images_from_nova(user, password, tenant_name, keystone_url, region_name=region_name)
         except Exception:
             images = None
             del services['compute']
             del services['image']
         if images:
             smallest_image = get_smallest_image(images)
-            smallest_image_id = smallest_image.id
+            if smallest_image:
+                smallest_image_id = smallest_image.id
     else:
         smallest_image_id = image_id
-    
+
     try:
         network_id = get_external_network_id(keystone_url, user,
                                              password, tenant_name)
@@ -227,17 +216,14 @@ def customized_tempest_conf(users, keystone_url, image_id=None, region_name=None
         network_id = 0
 
     # Create tempest config, add default sections
-    cfg = tempest.config.TempestConfigPrivate()
     tempest_config = ConfigParser.SafeConfigParser()
-    for section, _settings in vars(cfg).items():
-        if not tempest_config.has_section(section):
-            tempest_config.add_section(section)
 
     tempest_config.set('DEFAULT', 'debug', 'False')
     tempest_config.set('DEFAULT', 'use_stderr', 'False')
     tempest_config.set('DEFAULT', 'log_file', 'tempest.log')
     tempest_config.set('DEFAULT', 'lock_path', '/tmp')
 
+    tempest_config.add_section('identity')
     tempest_config.set('identity', 'uri', keystone_url)
 
     tempest_config.set('identity', 'username',
@@ -271,9 +257,11 @@ def customized_tempest_conf(users, keystone_url, image_id=None, region_name=None
         tempest_config.set('identity', 'region', region_name)
         tempest_config.set('compute', 'region', region_name)
 
+    tempest_config.add_section('object_storage')
     tempest_config.set('object_storage', 'operator_role',
                        users['admin_user']['tenant_name'])
 
+    tempest_config.add_section('compute')
     tempest_config.set('compute', 'image_ref', str(smallest_image_id))
     tempest_config.set('compute', 'image_ref_alt', str(smallest_image_id))
     tempest_config.set('compute', 'flavor_ref', str(smallest_flavor_id))
@@ -287,6 +275,7 @@ def customized_tempest_conf(users, keystone_url, image_id=None, region_name=None
         tempest_config.set('compute', 'allow_tenant_reuse', "False")
 
     if network_id is not None:
+        tempest_config.add_section('network')
         tempest_config.set('network', 'public_network_id', str(network_id))
 
     run_services = [('volume', 'cinder'),
@@ -296,6 +285,7 @@ def customized_tempest_conf(users, keystone_url, image_id=None, region_name=None
                     ('network', 'neutron'),
                     ]
 
+    tempest_config.add_section('service_available')
     for service, name in run_services:
         run = "True" if services.get(service) else "False"
         tempest_config.set('service_available', name, run)
@@ -340,7 +330,7 @@ def service_summary(successful_tests):
                    if prefix in str(test)]
         if service:
             service_name = service[0]
-            if not service_name in services:
+            if service_name not in services:
                 services[service_name] = ServiceSummary(service_name)
             result = settings.description_list.get(str(test))
             if result:
@@ -349,23 +339,6 @@ def service_summary(successful_tests):
                 services[service_name].set_release(release)
                 services[service_name].add_feature(feature)
     return services
-
-
-def get_services(user, password, tenant_name, keystone_url):
-    """ Returns list of services and a scoped token """
-    keystone = keystoneclient.v2_0.client.Client(auth_url=keystone_url,
-                                                 username=user,
-                                                 password=password,
-                                                 tenant_name=tenant_name)
-
-    # Create a dict of servicetype: endpoints
-    services = {}
-    for service in keystone.auth_ref['serviceCatalog']:
-        service_type = service['type']
-        endpoint = service['endpoints'][0]['publicURL']
-        if service_type not in services:
-            services[service_type] = endpoint
-    return (services, keystone.auth_ref['token'])
 
 
 """  Methods to execute the tests """
