@@ -33,7 +33,7 @@ from keystoneclient.v2_0.client import Client
 import keystoneclient
 import tempest
 
-from tempest_report.discover import customized_tempest_conf, get_tenants
+from tempest_report.discover import customized_tempest_conf
 from tempest_report import settings
 
 
@@ -196,9 +196,10 @@ def main(options):
     logger.addHandler(console)
     logger.addHandler(logfile)
 
-    tenants = get_tenants(options.os_username,
-                          options.os_password,
-                          options.os_auth_url)
+    keystone = keystone_client.Client(username=options.os_username,
+                                      password=options.os_password,
+                                      auth_url=options.os_auth_url)
+    tenants = keystone.tenants.findall()
 
     tenant_name = options.os_tenant_name
     if tenant_name is None:
