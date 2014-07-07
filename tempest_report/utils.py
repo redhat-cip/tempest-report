@@ -24,12 +24,10 @@ import random
 import re
 import string
 import subprocess
-import sys
 import tempfile
 import threading
 import time
 
-from keystoneclient.v2_0.client import Client
 import keystoneclient
 import tempest
 
@@ -196,9 +194,9 @@ def main(options):
     logger.addHandler(console)
     logger.addHandler(logfile)
 
-    keystone = keystone_client.Client(username=options.os_username,
-                                      password=options.os_password,
-                                      auth_url=options.os_auth_url)
+    keystone = keystoneclient.v2_0.client.Client(username=options.os_username,
+                                                 password=options.os_password,
+                                                 auth_url=options.os_auth_url)
     tenants = keystone.tenants.findall()
 
     tenant_name = options.os_tenant_name
