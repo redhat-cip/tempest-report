@@ -66,6 +66,9 @@ Examples:
                       default=os.environ.get('OS_REGION_NAME'),
                       help='Openstack tenant name. '
                            'Defaults to env[OS_REGION_NAME].')
+    parser.add_option('-e', '--exclude', dest="exclude",
+                      help='file with a list of regex of test to exclude.')
+
     parser.add_option('-r', '--release', default=sys.maxint,
                       dest="max_release_level",
                       help='Only run tests with a release lower or equal.'

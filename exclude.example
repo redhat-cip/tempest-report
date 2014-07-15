@@ -1,0 +1,5 @@
+# Disable one specific test
+test_cinder.SimpleReadOnlyCinderClientTest.test_cinder_service_list
+
+# Disable multiple tests
+test_vpnaas_extensions
