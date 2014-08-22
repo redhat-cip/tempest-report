@@ -39,6 +39,9 @@ from tempest_report import settings
 
 def load_excluded_tests(fname):
     """ Load the excluded tests form a flat file."""
+    if not fname:
+        return []
+
     regexps = []
     with open(fname) as excluded_tests:
         for line in excluded_tests:
