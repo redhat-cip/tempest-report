@@ -4,3 +4,4 @@ python-novaclient
 -e git://github.com/openstack/tempest.git#egg=tempest
 python-ceilometerclient
 requests
+junit-xml-output

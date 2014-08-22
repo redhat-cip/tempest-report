@@ -29,6 +29,7 @@ import tempfile
 import threading
 import time
 
+import junit_xml_output
 import keystoneclient
 import tempest
 
@@ -166,7 +167,8 @@ def executer(testname, configfile):
     return (success, output)
 
 
-def worker(queue, successful_tests, successful_subtests, verbose=False):
+def worker(queue, successful_tests, successful_subtests, junit_tests,
+           verbose=False):
     """ Single worker which will be executed as thread """
 
     logger = logging.getLogger('tempest_report')
@@ -177,6 +179,8 @@ def worker(queue, successful_tests, successful_subtests, verbose=False):
             break
 
         success, output = executer(testname, configfile_name)
+        junit_tests.append(junit_xml_output.TestCase(
+            testname, output, "success" if success else "failure"))
 
         logger.debug(output)
 
@@ -262,6 +266,7 @@ def main(options):
     queue = Queue.Queue()
     successful_tests = []
     successful_subtests = []
+    junit_tests = []
     all_tests = []
 
     excluded_tests = load_excluded_tests(options.exclude)
@@ -291,6 +296,7 @@ def main(options):
                                   args=(queue,
                                         successful_tests,
                                         successful_subtests,
+                                        junit_tests,
                                         options.verbose))
         thread.daemon = True
         thread.start()
@@ -333,3 +339,10 @@ def main(options):
         for feature in service.get_features():
             summary += "\t\t\t\t%s\n" % (feature,)
     logger.info(summary)
+
+    if options.junit:
+        print "Writting junit test reports to %s" % options.junit
+        junit_title = "tempest-report (%s)" % now.strftime("%Y%m%d-%H%M%S")
+        with open(options.junit, "w") as junit_file:
+            junit_xml = junit_xml_output.JunitXml(junit_title, junit_tests)
+            junit_file.write(junit_xml.dump())
