@@ -16,6 +16,7 @@
 
 
 import datetime
+import itertools
 import logging
 import os
 import pkgutil
@@ -33,6 +34,29 @@ import tempest
 
 from tempest_report.discover import customized_tempest_conf
 from tempest_report import settings
+
+
+def load_excluded_tests(fname):
+    """ Load the excluded tests form a flat file."""
+    regexps = []
+    with open(fname) as excluded_tests:
+        for line in excluded_tests:
+            line = line.strip()
+            if not line or line.startswith('#'):
+                continue
+            regexps.append(re.compile(line))
+    return regexps
+
+
+def test_is_excluded(testname, exclude_regexps):
+    """ Return True is the test is part of the exclude list."""
+    def test_not_match(regex):
+        return not regex.search(testname)
+
+    failed_at = len(list(itertools.takewhile(test_not_match,
+                                             exclude_regexps)))
+    excluded = failed_at != len(exclude_regexps)
+    return excluded
 
 
 def create_tenant_and_user(username, password, auth_url, tenant_name):
@@ -240,6 +264,8 @@ def main(options):
     successful_subtests = []
     all_tests = []
 
+    excluded_tests = load_excluded_tests(options.exclude)
+
     if not options.fullrun:
         for test, values in settings.description_list.items():
             test_level = values.get('level', 1)
@@ -247,13 +273,15 @@ def main(options):
             dummy = values.get('dummy', False)
             if (int(test_level) <= int(options.level) and
                     int(release_level) <= int(options.max_release_level) and
-                    not dummy):
+                    not dummy and
+                    not test_is_excluded(test, excluded_tests)):
                 queue.put((test, configfile.name))
                 all_tests.append(test)
     else:
         packages = pkgutil.walk_packages(tempest.__path__, prefix="tempest.")
         for _importer, testname, _ispkg in packages:
-            if "test_" in testname:
+            if ("test_" in testname and
+                    not test_is_excluded(testname, excluded_tests)):
                 queue.put((testname, configfile.name))
                 all_tests.append(testname)
 
