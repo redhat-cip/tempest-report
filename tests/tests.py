@@ -21,10 +21,8 @@ import subprocess
 import unittest
 
 import mock
-import keystoneclient
-import glanceclient
 
-from tempest_report import utils, settings
+from tempest_report import utils, settings, discover
 import tempest_report
 
 
@@ -44,20 +42,21 @@ class DummyFileObject(object):
 
 
 class DummyImage(object):
-    def __init__(self, size, disk_format, status, visibility='public'):
-        self.size = size
+    def __init__(self, size, disk_format, status, id=23,
+                 visibility='public'):
         self.disk_format = disk_format
         self.status = status
-        self.id = "23"
+        self.id = id
         self.visibility = visibility
+        self._info = {'OS-EXT-IMG-SIZE:size': size}
 
 
 class DummyFlavor(object):
-    def __init__(self, vcpus, disk, ram):
+    def __init__(self, vcpus, disk, ram, id="42"):
         self.vcpus = vcpus
         self.disk = disk
         self.ram = ram
-        self.id = "42"
+        self.id = id
 
 
 class Tenant(object):
@@ -98,33 +97,29 @@ class KeystoneDummy(object):
 
 
 class UtilTest(unittest.TestCase):
-    def test_get_smallest_flavor(self):
+
+    fake_creds = ("user", "password", "tenant_name", "http://127.0.0.1:5000")
+
+    @mock.patch('novaclient.client')
+    def test_get_smallest_flavor(self, novaclient):
         sample_flavors = []
-        sample_flavors.append(DummyFlavor(1, 1, 128))
-        sample_flavors.append(DummyFlavor(1, 0, 64))
-        sample_flavors.append(DummyFlavor(1, 1, 64))
+        sample_flavors.append(DummyFlavor(1, 1, 128, 42))
+        sample_flavors.append(DummyFlavor(1, 0, 64, 43))
+        sample_flavors.append(DummyFlavor(1, 1, 64, 44))
 
-        smallest_flavor = utils.get_smallest_flavor(sample_flavors)
-        self.assertEqual(smallest_flavor.disk, 0)
+        novaclient_cls = novaclient.get_client_class.return_value
+        novaclient_obj = novaclient_cls.return_value
+        novaclient_obj.flavors.list.return_value = sample_flavors
 
-    @mock.patch('keystoneclient.v2_0.client')
-    def test_get_services(self, keystone):
-        keystone.Client = KeystoneDummy
-        services, scoped_token = utils.get_services("user",
-                                                    "password",
-                                                    "tenant_name",
-                                                    "http://127.0.0.1:5000")
+        smallest_flavor = discover.get_smallest_flavor(*self.fake_creds)
+        self.assertEqual(smallest_flavor, 43)
+
+    @mock.patch('keystoneclient.v2_0.client.Client')
+    def test_get_services(self, keystoneclient):
+        keystoneclient.return_value = KeystoneDummy()
+        services = discover.get_services(*self.fake_creds)
 
         self.assertEqual(services, {'servicetype': 'url'})
-        self.assertEqual(scoped_token, {'id': 'token'})
-
-    @mock.patch('keystoneclient.v2_0.client')
-    def test_get_tenants(self, keystone):
-        keystone.Client = KeystoneDummy
-        tenants = utils.get_tenants("user",
-                                    "password",
-                                    "http://127.0.0.1:5000")
-        self.assertTrue(isinstance(tenants[0], Tenant))
 
     @mock.patch('subprocess.check_output')
     def test_executer(self, subprocess_mock):
@@ -178,62 +173,22 @@ class UtilTest(unittest.TestCase):
         self.assertEqual(str(summary), 'servicename')
         self.assertEqual(summary.features, ['feature', ])
 
-    @mock.patch('glanceclient.Client')
-    def test_get_images(self, glance):
-        class DummyImages(object):
-            def list(self):
-                return ['first image']
-
-        images = DummyImages()
-        glance.return_value.images = images
-
-        services = {'image': 'http://url:5000'}
-        token = {'id': 'token_id'}
-
-        retval = utils.get_images(services, token)
-        self.assertEqual(retval, ['first image'])
-
-        glance.assert_called_with(2, "http://url:5000", token="token_id")
-
-        self.raised = False
-
-        def side_effect(*args, **kwargs):
-            if not self.raised:
-                self.raised = True
-                raise glanceclient.exc.HTTPNotFound()
-            return glance
-
-        glance.side_effect = side_effect
-
-        utils.get_images(services, token)
-
-        glance.assert_called_with(1, "http://url:5000", token="token_id")
-
-    @mock.patch('novaclient.v1_1.client.Client')
-    def test_get_flavors(self, nova):
-        class DummyFlavors(object):
-            def list(self):
-                return ['flavor']
-
-        flavors = DummyFlavors()
-        nova.return_value.flavors = flavors
-        retval = utils.get_flavors("user", "password",
-                                   "tenant_name", "url")
-        self.assertEqual(retval, ['flavor'])
-
-        nova.assert_called_with("user", "password",
-                                "tenant_name", "url")
-
-    def test_get_smallest_image(self):
+    @mock.patch('novaclient.client')
+    def test_get_smallest_image(self, novaclient):
         images = []
-        images.append(DummyImage(10, 'qcow2', 'active'))
-        images.append(DummyImage(2, 'qcow2', 'active'))
+        images.append(DummyImage(10, 'qcow2', 'ACTIVE'))
+        images.append(DummyImage(2, 'qcow2', 'ACTIVE'))
         images.append(DummyImage(1, 'qcow2', 'other'))
-        images.append(DummyImage(1, 'other', 'active'))
-        images.append(DummyImage(0, 'qcow2', 'active', 'private'))
+        images.append(DummyImage(1, 'other', 'ACTIVE'))
+        images.append(DummyImage(0, 'qcow2', 'ACTIVE', id=42,
+                                 visibility='private'))
 
-        smallest_image = utils.get_smallest_image(images)
-        self.assertEqual(smallest_image.size, 2)
+        novaclient_cls = novaclient.get_client_class.return_value
+        novaclient_obj = novaclient_cls.return_value
+        novaclient_obj.images.list.return_value = images
+
+        smallest_image = discover.get_smallest_image(*self.fake_creds)
+        self.assertEqual(smallest_image, 42)
 
     @mock.patch('keystoneclient.v2_0.client.Client')
     def test_create_tenant_and_user(self, keystone):
@@ -251,46 +206,36 @@ class UtilTest(unittest.TestCase):
         self.assertTrue(keystone().tenants.create.called)
         self.assertTrue(keystone().users.create.called)
 
-    @mock.patch('keystoneclient.v2_0.client.Client')
-    @mock.patch('tempest_report.utils.get_tenants')
-    @mock.patch('tempest_report.utils.get_services')
-    @mock.patch('tempest_report.utils.get_flavors')
-    @mock.patch('tempest_report.utils.get_images')
+    @mock.patch('tempest_report.discover.get_smallest_flavor')
+    @mock.patch('tempest_report.discover.get_smallest_image')
+    @mock.patch('tempest_report.discover.get_external_network_id')
+    @mock.patch('tempest_report.discover.get_services')
     def test_customized_tempest_conf(self,
-                                     get_tenants,
                                      get_services,
-                                     get_flavors,
-                                     get_images,
-                                     keystone):
+                                     get_external_network_id,
+                                     get_smallest_image,
+                                     get_smallest_flavor):
 
-        tenant = Tenant("tenant_name")
-        tempest_report.utils.get_tenants.return_value = [tenant]
+        get_services.return_value = {'image': 'url'}
+        get_external_network_id.return_value = 32
+        get_smallest_image.return_value = 23
+        get_smallest_flavor.return_value = 42
 
-        image = DummyImage(1, 'ami', 'active')
-        tempest_report.utils.get_images.return_value = ([image])
-
-        flavor = DummyFlavor(1, 1, 1)
-        tempest_report.utils.get_flavors.return_value = ([flavor])
-
-        tempest_report.utils.get_services.return_value = (
-            {'image': 'url'}, {'id': 'id'})
-
-        users = {'admin_user': {'username': 'user',
-                                'password': 'password',
-                                'tenant_name': 'tenant_name'},
+        users = {'admin_user': {'username': 'admin',
+                                'password': 'admin_password',
+                                'tenant_name': 'admin_tenant'},
                  'first_user': {'username': 'user',
                                 'password': 'password',
-                                'tenant_name': 'tenant_name'},
+                                'tenant_name': 'tenant'},
                  'second_user': {'username': 'user',
                                  'password': 'password',
-                                 'tenant_name': 'tenant_name'}}
+                                 'tenant_name': 'tenant'}}
 
         content = utils.customized_tempest_conf(users, "http://keystone_url")
 
         self.assertIn("[DEFAULT]", content)
         self.assertIn("use_stderr = False", content)
         self.assertIn("log_file = tempest.log", content)
-        self.assertIn("[stress]", content)
         self.assertIn("[compute]", content)
         self.assertIn("image_ref = 23", content)
         self.assertIn("image_ref_alt = 23", content)
@@ -298,16 +243,9 @@ class UtilTest(unittest.TestCase):
         self.assertIn("flavor_ref = 42", content)
         self.assertIn("flavor_ref_alt = 42", content)
         self.assertIn("[network]", content)
-        self.assertIn("[boto]", content)
-        self.assertIn("[scenario]", content)
+        self.assertIn("public_network_id = 32", content)
         self.assertIn("[object_storage]", content)
-        self.assertIn("operator_role = tenant", content)
-        self.assertIn("[volume]", content)
-        self.assertIn("[debug]", content)
-        self.assertIn("[dashboard]", content)
-        self.assertIn("[orchestration]", content)
-        self.assertIn("[compute_admin]", content)
-        self.assertIn("[images]", content)
+        self.assertIn("operator_role = admin_tenant", content)
         self.assertIn("[service_available]", content)
         self.assertIn("cinder = False", content)
         self.assertIn("glance = True", content)
@@ -318,14 +256,14 @@ class UtilTest(unittest.TestCase):
         #self.assertIn("uri = keystone_url", content)
         self.assertIn("username = user", content)
         self.assertIn("alt_username = user", content)
-        self.assertIn("admin_username = user", content)
+        self.assertIn("admin_username = admin", content)
         self.assertIn("password = password", content)
         self.assertIn("alt_password = password", content)
-        self.assertIn("admin_password = password", content)
-        self.assertIn("tenant_name = tenant", content)
-        self.assertIn("alt_tenant_name = tenant", content)
-        self.assertIn("admin_tenant_name = tenant", content)
-        self.assertIn("admin_role = tenant", content)
+        self.assertIn("admin_password = admin_password", content)
+        self.assertIn("tenant_name = \"tenant\"", content)
+        self.assertIn("alt_tenant_name = \"tenant\"", content)
+        self.assertIn("admin_tenant_name = \"admin_tenant\"", content)
+        self.assertIn("admin_role = \"admin_tenant\"", content)
 
     @mock.patch('logging.getLogger')
     @mock.patch('Queue.Queue')
@@ -343,14 +281,16 @@ class UtilTest(unittest.TestCase):
 
         successful_tests = []
         successful_subtests = []
+        junit_tests = []
         tempest_report.utils.executer.return_value = (True, "")
         queue.get_nowait.side_effect = side_effect
-        utils.worker(queue, successful_tests, successful_subtests)
+        utils.worker(queue, successful_tests, successful_subtests, junit_tests)
 
         queue.get_nowait.assert_called_with()
         logger.assert_called_with('tempest_report')
         executer.assert_called_with('testname', "confname")
         self.assertEqual(successful_tests, ["testname"])
+        self.assertEqual(len(junit_tests), 1)
         queue.task_done.assert_called_with()
 
     @mock.patch('keystoneclient.v2_0.client')
@@ -369,6 +309,8 @@ class UtilTest(unittest.TestCase):
         options.level = 1
         options.max_release_level = 10
         options.verbose = False
+        options.exclude = None
+        options.junit = None
         options.is_admin = False
 
         thread.return_value.isAlive = lambda: False
