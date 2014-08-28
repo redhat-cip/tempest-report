@@ -28,8 +28,8 @@ import subprocess
 import tempfile
 import threading
 import time
+from xml.sax import saxutils
 
-import junit_xml_output
 import keystoneclient
 import tempest
 
@@ -93,6 +93,24 @@ def delete_tenant_and_user(username, password, auth_url, tenant_name, user):
                                                  tenant_name=tenant_name)
     keystone.users.delete(user['user_id'])
     keystone.tenants.delete(user['tenant_id'])
+
+
+def gen_junit_file(filepath, title, tests):
+    failures = len(filter(lambda x: not x[2], tests))
+
+    with open(filepath, "w") as f:
+        f.write('<testsuite failures="%d" name="%s"" tests="%s">\n' %
+                     (failures, title, len(tests)))
+        for testname, output, status in tests:
+            if status:
+                f.write('    <testcase name="%s"/>\n' % testname)
+            else:
+                f.write('    <testcase name="%s">\n' % testname)
+                f.write('        <failure>\n')
+                f.write(saxutils.escape(output))
+                f.write('        </failure>\n')
+                f.write('    </testcase>\n')
+        f.write('</testsuite>\n')
 
 
 """ Methods to create a summary of the tests """
@@ -182,8 +200,7 @@ def worker(queue, successful_tests, successful_subtests, junit_tests,
             break
 
         success, output = executer(testname, configfile_name)
-        junit_tests.append(junit_xml_output.TestCase(
-            testname, output, "success" if success else "failure"))
+        junit_tests.append((testname, output, success))
 
         logger.debug(output)
 
@@ -346,6 +363,4 @@ def main(options):
     if options.junit:
         print "Writting junit test reports to %s" % options.junit
         junit_title = "tempest-report (%s)" % now.strftime("%Y%m%d-%H%M%S")
-        with open(options.junit, "w") as junit_file:
-            junit_xml = junit_xml_output.JunitXml(junit_title, junit_tests)
-            junit_file.write(junit_xml.dump())
+        gen_junit_file(options.junit, junit_title, junit_tests)
